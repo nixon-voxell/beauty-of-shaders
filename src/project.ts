@@ -1,7 +1,13 @@
-import {makeProject} from '@motion-canvas/core';
+import {makeProject} from "@motion-canvas/core";
 
-import example from './scenes/example?scene';
+import intro from "./scenes/intro?scene";
+import outline from "./scenes/outline?scene"
+import coordinate_system from "./scenes/coordinate_system?scene"
 
 export default makeProject({
-  scenes: [example],
+  scenes: [
+    intro,
+    outline,
+    coordinate_system,
+  ],
 });
