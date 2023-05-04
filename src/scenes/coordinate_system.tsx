@@ -16,14 +16,14 @@ export default makeScene2D(function* (view) {
     <>
       <Rect
         position={new Vector2(-700.0, -400.0)}
-        size={new Vector2(240.0, 50.0)}
+        size={new Vector2(320.0, 80.0)}
         fill={COLOR.LIGHT_BLUE}
         radius={10.0}
       >
         <Txt
-          scale={0.08}
+          scale={0.1}
         >
-          Coodinate System
+          Coordinate Systems
         </Txt>
       </Rect>
     </>

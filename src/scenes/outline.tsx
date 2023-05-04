@@ -138,7 +138,8 @@ export default makeScene2D(function* (view) {
 
   yield* all(
     content0.position(new Vector2(-700.0, -400.0), 0.6, easeInOutCubic),
-    content0.size(new Vector2(240.0, 50.0), 0.6),
-    content0.children()[0].scale(0.08, 0.6),
+    content0.size(new Vector2(320.0, 80.0), 0.6),
+    content0.scale(1.0, 0.6),
+    content0.children()[0].scale(0.1, 0.6),
   )
 });
