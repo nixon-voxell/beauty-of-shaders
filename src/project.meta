@@ -4,7 +4,7 @@
     "background": "rgb(0,5,10)",
     "range": [
       0,
-      1.9333323333333334
+      null
     ],
     "size": {
       "x": 1920,
@@ -13,7 +13,7 @@
     "audioOffset": 0
   },
   "preview": {
-    "fps": 30,
+    "fps": 60,
     "resolutionScale": 1
   },
   "rendering": {
