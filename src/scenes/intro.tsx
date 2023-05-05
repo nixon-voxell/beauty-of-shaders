@@ -4,7 +4,7 @@ import {beginSlide, createRef} from "@motion-canvas/core/lib/utils";
 import {all} from "@motion-canvas/core/lib/flow";
 import {easeInOutCubic, easeInOutQuart, easeInOutQuint} from "@motion-canvas/core/lib/tweening";
 import {createSignal} from "@motion-canvas/core/lib/signals";
-import { Color, Vector2 } from "@motion-canvas/core/lib/types";
+import { Color } from "@motion-canvas/core/lib/types";
 
 import {COLOR} from "../styles"
 
