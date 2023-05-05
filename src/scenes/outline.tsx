@@ -42,36 +42,43 @@ export default makeScene2D(function* (view) {
     return new Rect({
       width: "100%",
       height: "100%",
-      // fill: COLOR.TRANSPARENT,
+      fill: COLOR.LIGHT_BLUE,
+      radius: 10,
 
       children: [
-        new Rect({
-              width: "100%",
-              height: "100%",
-              fill: COLOR.LIGHT_BLUE,
-              radius: 10,
-
-              children: [
-                new Txt({
-                  layout: false,
-                  text: text,
-                  scale: 0.12,
-                  fill: COLOR.BLACK,
-                })
-              ],
-            })
+        new Txt({
+          layout: false,
+          text: text,
+          scale: 0.12,
+          fill: COLOR.BLACK,
+        })
       ],
     })
   }
 
   const contents: Rect[] = new Array<Rect>(
-    createContentRect("Coordinate Systems").children()[0] as Rect,
-    createContentRect("Basic Mesh Concepts").children()[0] as Rect,
-    createContentRect("Graphics Pipeline").children()[0] as Rect,
-    createContentRect("Vertex & Fragment Shaders").children()[0] as Rect,
-    createContentRect("Writing your First Shader").children()[0] as Rect,
-    createContentRect("Debugging Shaders").children()[0] as Rect,
-    createContentRect("What's Next").children()[0] as Rect,
+    createContentRect("What are Shaders Anyway?") as Rect,
+    // what is a shader? (definition)
+    // types of shaders
+
+    // column 1
+    // graphics pipeline specific shaders
+    // rasterizer: fragment shader, vertex shader, geometry shader, tesselation shader
+    // ray tracing: ray generation shader, hit/miss shader
+
+    // column 2
+    // compute shaders (GPGPU) -> can be used for non graphics related stuff (e.g. physics simulation)
+    createContentRect("Introduction to Shaders") as Rect,
+
+    createContentRect("Writing your First Shader") as Rect,
+
+    // createContentRect("Coordinate Systems") as Rect,
+    // createContentRect("Basic Mesh Concepts") as Rect,
+    // createContentRect("Graphics Pipeline") as Rect,
+    // createContentRect("Vertex & Fragment Shaders") as Rect,
+    // createContentRect("Writing your First Shader") as Rect,
+    // createContentRect("Debugging Shaders") as Rect,
+    // createContentRect("What's Next") as Rect,
   );
 
   const contentSizes: Vector2[] = new Array<Vector2>();
