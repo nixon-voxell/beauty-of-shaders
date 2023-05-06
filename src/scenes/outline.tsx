@@ -2,13 +2,10 @@ import { COLOR } from "../styles"
 import { outlineRects, outlineLayout, setup, focusOnOutlineIndex, outlineTitle } from "../utils/outline_util";
 
 import {makeScene2D} from "@motion-canvas/2d/lib/scenes";
-import {
-  Txt, Circle
-} from "@motion-canvas/2d/lib/components";
-import { beginSlide, createRef } from "@motion-canvas/core/lib/utils";
-import { all, sequence, waitFor } from "@motion-canvas/core/lib/flow";
+import { Circle } from "@motion-canvas/2d/lib/components";
+import { beginSlide } from "@motion-canvas/core/lib/utils";
+import { all, sequence } from "@motion-canvas/core/lib/flow";
 import { easeInOutCubic } from "@motion-canvas/core/lib/tweening";
-import { Vector2 } from "@motion-canvas/core/lib/types";
 
 export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);
@@ -39,12 +36,12 @@ export default makeScene2D(function* (view) {
   yield* beginSlide("Walk you through each section");
 
   for (var o = 0; o < outlineRects.length; o++) {
-    yield* focusOnOutlineIndex(o, 0.6, 1.2);
+    yield* focusOnOutlineIndex(o, 0.4, 1.2);
   }
 
   yield* beginSlide("Focus on 'What are Shaders Anyway?'");
 
-  yield* focusOnOutlineIndex(0, 0.4, 1.2);
+  yield* focusOnOutlineIndex(0, 0.6, 1.2);
 
   const transCircle: Circle = new Circle({
     size: 0.0,

@@ -112,4 +112,4 @@ function* focusOnOutlineIndex(index: number, duration: number, scale: number) {
   );
 }
 
-export { setup, focusOnOutlineIndex, outlineTitle, outlineRects, outlineLayout }
+export { setup, focusOnOutlineIndex, outlineTitle, outlineRects, outlineLayout };
