@@ -2,10 +2,10 @@ import { Rect } from "@motion-canvas/2d/lib/components";
 import { all } from "@motion-canvas/core/lib/flow";
 import type { TimingFunction } from "@motion-canvas/core/lib/tweening";
 
-function* rectScaleReview(rect: Rect, duration: number, timingFunc?: TimingFunction) {
+function* rectScaleReview(rect: Rect, duration: number, initScaleSize: number, timingFunc?: TimingFunction) {
   const rectSize = rect.size();
 
-  rect.size(rect.size().mul(0.9));
+  rect.size(rect.size().mul(initScaleSize));
   rect.opacity(0.0);
   yield* all (
     rect.size(rectSize, duration, timingFunc),
@@ -13,4 +13,14 @@ function* rectScaleReview(rect: Rect, duration: number, timingFunc?: TimingFunct
   );
 }
 
-export { rectScaleReview };
+function cloneRectArray(rects: Rect[]) {
+  const clonedRects: Rect[] = new Array<Rect>(rects.length);
+
+  for (var r = 0; r < rects.length; r++) {
+    clonedRects[r] = rects[r].clone();
+  }
+
+  return clonedRects;
+}
+
+export { rectScaleReview, cloneRectArray };

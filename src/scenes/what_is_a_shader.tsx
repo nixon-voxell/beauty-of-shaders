@@ -1,16 +1,18 @@
 import { COLOR } from "../styles";
-import { rectScaleReview } from "../utils/anim_util"
+import { rectScaleReview, cloneRectArray } from "../utils/anim_util"
 
 import { Rect, Txt } from "@motion-canvas/2d/lib/components";
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
 import { all, sequence } from "@motion-canvas/core/lib/flow";
-import { easeInOutCubic } from "@motion-canvas/core/lib/tweening";
+import { easeInOutCubic, easeInOutQuad, map, tween } from "@motion-canvas/core/lib/tweening";
 import { Vector2 } from "@motion-canvas/core/lib/types";
 import { beginSlide, useRandom } from "@motion-canvas/core/lib/utils";
+import {useLogger} from '@motion-canvas/core/lib/utils';
 
 export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);
 
+  const logger = useLogger();
   const random = useRandom();
 
   const shaderRect: Rect = new Rect({
@@ -31,7 +33,7 @@ export default makeScene2D(function* (view) {
 	yield* beginSlide("Draw shader rect");
 
   yield* all (
-    rectScaleReview(shaderRect, 0.6, easeInOutCubic),
+    rectScaleReview(shaderRect, 0.6, 0.9, easeInOutCubic),
     // shaderRect.size(deviceRectSize, 0.6, easeInOutCubic),
     shaderRect.opacity(1.0, 0.6, easeInOutCubic),
     shaderTxt.text("Shader", 0.6, easeInOutCubic),
@@ -73,7 +75,7 @@ export default makeScene2D(function* (view) {
     )
   )
 
-  yield* beginSlide("");
+  yield* beginSlide("Show GPU device");
 
   const gpuDevice: Rect = new Rect({
     x: 400.0,
@@ -84,6 +86,7 @@ export default makeScene2D(function* (view) {
   });
 
   const gpuTxt: Txt = new Txt({
+    // y: -gpuDevice.size.y() * 0.5 - 50.0,
     scale: 0.3,
     fill: COLOR.BLACK,
   });
@@ -93,9 +96,87 @@ export default makeScene2D(function* (view) {
 
   yield* shaderRect.position(shaderRect.position().sub(new Vector2(700.0, 300.0)), 0.6);
   yield* all(
-    rectScaleReview(gpuDevice, 0.6, easeInOutCubic),
+    rectScaleReview(gpuDevice, 0.6, 0.9, easeInOutCubic),
     gpuTxt.text("GPU", 0.6),
   )
+
+  yield* beginSlide("Show GPU cores");
+
+  const gridSize: number = 10;
+  const gridGap: number = 10;
+  const padding: number = 100;
+  const deviceWidth: number = gpuDevice.size.x() - padding;
+  const coreSize: number = deviceWidth / gridSize - gridGap;
+  const cores: Rect[][] = new Array<Rect[]>(gridSize);
+
+  // initialize array in array
+  for (var g = 0; g < gridSize; g++) {
+    cores[g] = new Array<Rect>(gridSize);
+  }
+
+  function cloneCores() {
+    const clonedCores: Rect[][] = new Array<Rect[]>(cores.length);
+
+    for (var c = 0; c < cores.length; c++) {
+      clonedCores[c] = cloneRectArray(cores[c]);
+    }
+
+    return clonedCores;
+  }
+
+  for (var x = 0; x < gridSize; x++) {
+    for (var y = 0; y < gridSize; y++) {
+      var pos = new Vector2(x, y);
+      pos = pos.mul(coreSize + gridGap);
+      pos = pos.sub((deviceWidth - coreSize - gridGap) * 0.5);
+
+      const core: Rect = new Rect({
+        size: coreSize * 0.5,
+        radius: 10.0,
+        fill: COLOR.BLACK,
+        // fill: "rgb(" + Math.trunc(x * 255 / gridSize) + ", " + (255 - Math.trunc(y * 255 / gridSize)) + ", 0)",
+        opacity: 0.0,
+      });
+
+      cores[x][y] = core;
+      gpuDevice.add(core);
+      core.position(pos);
+    }
+  }
+
+  const corePrograms: Rect[][] = cloneCores();
+  const coreInputs: Rect[][] = cloneCores();
+
+  for (var x = 0; x < gridSize; x++) {
+    for (var y = 0; y < gridSize; y++) {
+      const coreProg: Rect = corePrograms[x][y];
+      const coreIn: Rect = coreInputs[x][y];
+
+      coreProg.fill("rgb(" + Math.trunc(x * 255 / gridSize) + ", " + (255 - Math.trunc(y * 255 / gridSize)) + ", 0)");
+      coreIn.fill(COLOR.BLUE);
+
+      gpuDevice.add(coreProg);
+      gpuDevice.add(coreIn);
+    }
+  }
+
+  yield* gpuTxt.text("", 0.4);
+  yield* tween(
+    2.0, value => {
+      const scaledValue = gridSize * 2 * easeInOutQuad(value);
+      // logger.info(scaledValue.toString());
+
+      for (var x = 0; x < gridSize; x++) {
+        for (var y = 0; y < gridSize; y++) {
+          const localValue = Math.min(Math.max(scaledValue - x - y, 0.0), 1.0);
+
+          const core: Rect = cores[x][y];
+          core.size(map(coreSize * 0.5, coreSize, localValue));
+          core.opacity(localValue);
+        }
+      }
+    }
+  );
 
   yield* beginSlide("");
 });
