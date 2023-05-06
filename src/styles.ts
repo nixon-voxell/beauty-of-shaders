@@ -7,6 +7,6 @@ export const COLOR = {
   LIGHT_BLUE: "rgb(145, 158, 222)",
 
   WHITE: "rgba(255, 255, 255, 0.54)",
-  BLACK: "rgba(0, 5, 0, 0.87)",
+  BLACK: "rgb(0, 5, 10)",
   TRANSPARENT: "rgba(0, 0, 0, 0.0)",
 }
