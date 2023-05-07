@@ -1,10 +1,11 @@
 import { COLOR } from "../styles";
-import { rectScaleReview, cloneRectArray } from "../utils/anim_util"
+import { rectScaleReview } from "../utils/anim_util"
+import { SquareGridConfig, createSquareGrid, animSquareGrid } from "../utils/grid_util";
 
 import { Rect, Txt } from "@motion-canvas/2d/lib/components";
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
 import { all, sequence } from "@motion-canvas/core/lib/flow";
-import { easeInOutCubic, easeInOutQuad, map, tween } from "@motion-canvas/core/lib/tweening";
+import { easeInOutCubic, easeInOutQuad } from "@motion-canvas/core/lib/tweening";
 import { Vector2 } from "@motion-canvas/core/lib/types";
 import { beginSlide, useRandom } from "@motion-canvas/core/lib/utils";
 import {useLogger} from '@motion-canvas/core/lib/utils';
@@ -38,8 +39,6 @@ export default makeScene2D(function* (view) {
     shaderRect.opacity(1.0, 0.6, easeInOutCubic),
     shaderTxt.text("Shader", 0.6, easeInOutCubic),
   );
-
-  // yield* beginSlide("Draw shader lines");
 
   const lineRect: Rect = new Rect({
     size: new Vector2(0.0, 20.0),
@@ -100,83 +99,107 @@ export default makeScene2D(function* (view) {
     gpuTxt.text("GPU", 0.6),
   )
 
-  yield* beginSlide("Show GPU cores");
+  const gridConfig0: SquareGridConfig = {
+    size: 4,
+    gap: 30,
+    padding: 100,
+  };
+  const gridConfig1: SquareGridConfig = {
+    size: 6,
+    gap: 20,
+    padding: 100,
+  };
 
-  const gridSize: number = 10;
-  const gridGap: number = 10;
-  const padding: number = 100;
-  const deviceWidth: number = gpuDevice.size.x() - padding;
-  const coreSize: number = deviceWidth / gridSize - gridGap;
-  const cores: Rect[][] = new Array<Rect[]>(gridSize);
+  const gridConfig: SquareGridConfig = {
+    size: 10,
+    gap: 10,
+    padding: 100,
+  };
 
-  // initialize array in array
-  for (var g = 0; g < gridSize; g++) {
-    cores[g] = new Array<Rect>(gridSize);
-  }
+  const cores0: Rect[][] = createSquareGrid(gridConfig0, COLOR.BLACK, gpuDevice);
+  const cores1: Rect[][] = createSquareGrid(gridConfig1, COLOR.BLACK, gpuDevice);
+  const cores: Rect[][] = createSquareGrid(gridConfig, COLOR.BLACK, gpuDevice);
+  const corePrograms: Rect[][] = createSquareGrid(gridConfig, COLOR.BLACK, gpuDevice);
+  const coreInputs: Rect[][] = createSquareGrid(gridConfig, COLOR.BLACK, gpuDevice);
+  const coreOutputs: Rect[][] = createSquareGrid(gridConfig, COLOR.BLACK, gpuDevice);
 
-  function cloneCores() {
-    const clonedCores: Rect[][] = new Array<Rect[]>(cores.length);
+  const invGridSize = 1.0 / gridConfig.size;
 
-    for (var c = 0; c < cores.length; c++) {
-      clonedCores[c] = cloneRectArray(cores[c]);
-    }
-
-    return clonedCores;
-  }
-
-  for (var x = 0; x < gridSize; x++) {
-    for (var y = 0; y < gridSize; y++) {
-      var pos = new Vector2(x, y);
-      pos = pos.mul(coreSize + gridGap);
-      pos = pos.sub((deviceWidth - coreSize - gridGap) * 0.5);
-
-      const core: Rect = new Rect({
-        size: coreSize * 0.5,
-        radius: 10.0,
-        fill: COLOR.BLACK,
-        // fill: "rgb(" + Math.trunc(x * 255 / gridSize) + ", " + (255 - Math.trunc(y * 255 / gridSize)) + ", 0)",
-        opacity: 0.0,
-      });
-
-      cores[x][y] = core;
-      gpuDevice.add(core);
-      core.position(pos);
-    }
-  }
-
-  const corePrograms: Rect[][] = cloneCores();
-  const coreInputs: Rect[][] = cloneCores();
-
-  for (var x = 0; x < gridSize; x++) {
-    for (var y = 0; y < gridSize; y++) {
+  for (var x = 0; x < gridConfig.size; x++) {
+    for (var y = 0; y < gridConfig.size; y++) {
       const coreProg: Rect = corePrograms[x][y];
       const coreIn: Rect = coreInputs[x][y];
+      const coreOut: Rect = coreOutputs[x][y];
 
-      coreProg.fill("rgb(" + Math.trunc(x * 255 / gridSize) + ", " + (255 - Math.trunc(y * 255 / gridSize)) + ", 0)");
-      coreIn.fill(COLOR.BLUE);
+      const uv: Vector2 = new Vector2(x * invGridSize, 1.0 - y * invGridSize);
+      const dist: number = uv.sub(0.5).magnitude;
+
+      const uvColor: Vector2 = new Vector2(Math.trunc(uv.x * 255), Math.trunc(uv.y * 255));
+      const distColor: number = Math.trunc(dist * 255);
+
+      coreProg.fill(COLOR.BLUE);
+      coreIn.fill(`rgb(${uvColor.x}, ${uvColor.y}, 0)`);
+      coreOut.fill(`rgb(${distColor}, ${distColor}, ${distColor})`);
+
+      // coreProg.opacity(1.0);
 
       gpuDevice.add(coreProg);
       gpuDevice.add(coreIn);
+      gpuDevice.add(coreOut);
     }
   }
 
+  const core0OriginSize: number = cores0[0][0].width();
+  const core1OriginSize: number = cores1[0][0].width();
+  const coreOriginSize: number = cores[0][0].width();
+
+  yield* beginSlide("Show GPU cores0");
+
   yield* gpuTxt.text("", 0.4);
-  yield* tween(
-    2.0, value => {
-      const scaledValue = gridSize * 2 * easeInOutQuad(value);
-      // logger.info(scaledValue.toString());
-
-      for (var x = 0; x < gridSize; x++) {
-        for (var y = 0; y < gridSize; y++) {
-          const localValue = Math.min(Math.max(scaledValue - x - y, 0.0), 1.0);
-
-          const core: Rect = cores[x][y];
-          core.size(map(coreSize * 0.5, coreSize, localValue));
-          core.opacity(localValue);
-        }
-      }
-    }
+  yield* animSquareGrid(
+    gridConfig0, cores0,
+    core0OriginSize * 0.5, core0OriginSize,
+    0.0, 1.0,
+    1.0, easeInOutQuad
   );
+
+  yield* beginSlide("Show GPU cores1");
+
+  yield* sequence(
+    0.2,
+    animSquareGrid(
+      gridConfig0, cores0,
+      core0OriginSize, core0OriginSize * 0.5,
+      1.0, 0.0,
+      1.0, easeInOutQuad
+    ),
+    animSquareGrid(
+      gridConfig1, cores1,
+      core1OriginSize * 0.5, core1OriginSize,
+      0.0, 1.0,
+      1.0, easeInOutQuad
+    ),
+  )
+
+  yield* beginSlide("More cores final");
+
+  yield* sequence(
+    0.2,
+    animSquareGrid(
+      gridConfig1, cores1,
+      core1OriginSize, core1OriginSize * 0.5,
+      1.0, 0.0,
+      1.0, easeInOutQuad
+    ),
+    animSquareGrid(
+      gridConfig, cores,
+      coreOriginSize * 0.5, coreOriginSize,
+      0.0, 1.0,
+      1.0, easeInOutQuad
+    ),
+  )
+
+  yield* beginSlide("Show GPU programs");
 
   yield* beginSlide("");
 });

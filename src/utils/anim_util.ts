@@ -13,14 +13,4 @@ function* rectScaleReview(rect: Rect, duration: number, initScaleSize: number, t
   );
 }
 
-function cloneRectArray(rects: Rect[]) {
-  const clonedRects: Rect[] = new Array<Rect>(rects.length);
-
-  for (var r = 0; r < rects.length; r++) {
-    clonedRects[r] = rects[r].clone();
-  }
-
-  return clonedRects;
-}
-
-export { rectScaleReview, cloneRectArray };
+export { rectScaleReview };
