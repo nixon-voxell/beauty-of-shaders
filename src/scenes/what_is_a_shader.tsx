@@ -2,10 +2,10 @@ import { COLOR } from "../styles";
 import { rectScaleReview } from "../utils/anim_util"
 import { SquareGridConfig, createSquareGrid, animSquareGrid } from "../utils/grid_util";
 
-import { Rect, Txt } from "@motion-canvas/2d/lib/components";
+import { Line, Rect, Txt } from "@motion-canvas/2d/lib/components";
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
-import { all, sequence } from "@motion-canvas/core/lib/flow";
-import { easeInOutCubic, easeInOutQuad } from "@motion-canvas/core/lib/tweening";
+import { all, delay, sequence } from "@motion-canvas/core/lib/flow";
+import { easeInOutCubic, easeInOutQuad, easeInOutSine } from "@motion-canvas/core/lib/tweening";
 import { Vector2 } from "@motion-canvas/core/lib/types";
 import { beginSlide, useRandom } from "@motion-canvas/core/lib/utils";
 import {useLogger} from '@motion-canvas/core/lib/utils';
@@ -72,7 +72,7 @@ export default makeScene2D(function* (view) {
         line.position.x(0.0 - (maxLineLength - lineLengths[index]) * 0.5, 0.4, easeInOutCubic),
       )
     )
-  )
+  );
 
   yield* beginSlide("Show GPU device");
 
@@ -93,7 +93,7 @@ export default makeScene2D(function* (view) {
   view.add(gpuDevice);
   gpuDevice.add(gpuTxt);
 
-  yield* shaderRect.position(shaderRect.position().sub(new Vector2(700.0, 300.0)), 0.6);
+  yield* shaderRect.position(shaderRect.position().sub(new Vector2(500.0, 300.0)), 0.6);
   yield* all(
     rectScaleReview(gpuDevice, 0.6, 0.9, easeInOutCubic),
     gpuTxt.text("GPU", 0.6),
@@ -111,7 +111,7 @@ export default makeScene2D(function* (view) {
   };
 
   const gridConfig: SquareGridConfig = {
-    size: 10,
+    size: 11,
     gap: 10,
     padding: 100,
   };
@@ -160,46 +160,153 @@ export default makeScene2D(function* (view) {
     gridConfig0, cores0,
     core0OriginSize * 0.5, core0OriginSize,
     0.0, 1.0,
-    1.0, easeInOutQuad
+    1.0, easeInOutSine
   );
 
   yield* beginSlide("Show GPU cores1");
 
   yield* sequence(
-    0.2,
+    0.1,
     animSquareGrid(
       gridConfig0, cores0,
       core0OriginSize, core0OriginSize * 0.5,
       1.0, 0.0,
-      1.0, easeInOutQuad
+      1.0, easeInOutSine
     ),
     animSquareGrid(
       gridConfig1, cores1,
       core1OriginSize * 0.5, core1OriginSize,
       0.0, 1.0,
-      1.0, easeInOutQuad
+      1.0, easeInOutSine
     ),
-  )
+  );
 
   yield* beginSlide("More cores final");
 
   yield* sequence(
-    0.2,
+    0.1,
     animSquareGrid(
       gridConfig1, cores1,
       core1OriginSize, core1OriginSize * 0.5,
       1.0, 0.0,
-      1.0, easeInOutQuad
+      1.0, easeInOutSine
     ),
     animSquareGrid(
       gridConfig, cores,
       coreOriginSize * 0.5, coreOriginSize,
       0.0, 1.0,
-      1.0, easeInOutQuad
+      1.0, easeInOutSine
     ),
-  )
+  );
 
   yield* beginSlide("Show GPU programs");
+
+  yield* animSquareGrid(
+    gridConfig, corePrograms,
+    coreOriginSize * 0.2, coreOriginSize * 0.7,
+    0.0, 0.7,
+    2.0, easeInOutSine
+  );
+
+  // create input rect
+  const inputRect: Rect = new Rect({
+    x: shaderRect.position.x,
+    y: -340.0,
+    size: 140.0,
+    radius: 30.0,
+    fill: "rgb(200, 200, 0)",
+    opacity: 0.0,
+  });
+  const inputTxt: Txt = new Txt({
+    scale: 0.12,
+    fill: COLOR.BLACK,
+  });
+  const inputLine: Line = new Line({
+    x: shaderRect.position.x,
+    y: -250.0,
+    lineWidth: 10.0,
+    stroke: COLOR.WHITE,
+    points: [
+      [0.0, 0.0],
+      [0.0, 80.0],
+    ],
+    end: 0.0,
+    endArrow: true,
+    arrowSize: 0.0,
+  });
+
+  inputRect.add(inputTxt);
+  view.add(inputLine);
+  view.add(inputRect);
+
+  // create output rect
+  const outputRect: Rect = new Rect({
+    x: shaderRect.position.x,
+    y: 340.0,
+    size: 140.0,
+    radius: 30.0,
+    fill: COLOR.WHITE,
+    opacity: 0.0,
+  });
+  const outputTxt: Txt = inputTxt.clone();
+  const outputLine: Line = inputLine.clone();
+  outputLine.position.x(inputLine.position.x());
+  outputLine.position.y(170.0);
+
+  outputRect.add(outputTxt);
+  view.add(outputLine);
+  view.add(outputRect);
+
+  yield* beginSlide("Add input to shader");
+
+  yield* shaderRect.position.y(0.0, 0.6, easeInOutCubic);
+  yield* all(
+    rectScaleReview(inputRect, 0.6, 0.9, easeInOutCubic),
+    inputTxt.text("Input", 0.6),
+    delay(
+      0.3,
+      sequence(
+        0.1,
+        inputLine.end(1.0, 0.6),
+        inputLine.arrowSize(20.0, 0.6),
+      )
+    ),
+  );
+
+  yield* beginSlide("Show GPU inputs");
+
+  yield* animSquareGrid(
+    gridConfig, coreInputs,
+    coreOriginSize * 0.2, coreOriginSize * 0.7,
+    0.0, 1.0,
+    2.0, easeInOutSine
+  );
+
+  yield* beginSlide("Add output from shader");
+
+  yield* all(
+    delay(
+      0.3,
+      all(
+        rectScaleReview(outputRect, 0.6, 0.9, easeInOutCubic),
+        outputTxt.text("Output", 0.6),
+      )
+    ),
+    sequence(
+      0.1,
+      outputLine.end(1.0, 0.6),
+      outputLine.arrowSize(20.0, 0.6),
+    )
+  );
+
+  yield* beginSlide("Show GPU outputs");
+
+  yield* animSquareGrid(
+    gridConfig, coreOutputs,
+    coreOriginSize * 0.2, coreOriginSize * 0.72,
+    0.0, 1.0,
+    2.0, easeInOutSine
+  );
 
   yield* beginSlide("");
 });

@@ -1,4 +1,3 @@
-import { COLOR } from "../styles";
 import { Rect } from "@motion-canvas/2d/lib/components";
 import { Vector2 } from "@motion-canvas/core/lib/types";
 import type { TimingFunction } from "@motion-canvas/core/lib/tweening";
