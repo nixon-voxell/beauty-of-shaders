@@ -1,3 +1,4 @@
+import { COLOR } from "../styles";
 import { Rect } from "@motion-canvas/2d/lib/components";
 import { Vector2 } from "@motion-canvas/core/lib/types";
 import type { TimingFunction } from "@motion-canvas/core/lib/tweening";
@@ -55,10 +56,16 @@ function* animSquareGrid(
 
       for (var x = 0; x < gridConfig.size; x++) {
         for (var y = 0; y < gridConfig.size; y++) {
+          const rect: Rect = rects[x][y];
+
+          // skip if animation reached
+          // if (rect.opacity() == endOpacity) {
+          //   continue;
+          // }
+
           // constraint value to between 0.0 and 1.0
           const localValue = Math.min(Math.max(scaledValue - x - y, 0.0), 1.0);
 
-          const rect: Rect = rects[x][y];
           rect.size(map(startSize, endSize, localValue));
           rect.opacity(map(startOpacity, endOpacity, localValue));
         }

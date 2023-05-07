@@ -1,8 +1,5 @@
-import {
-  Layout, Txt, Rect
-} from "@motion-canvas/2d/lib/components";
-import { all, delay, sequence, waitFor } from "@motion-canvas/core/lib/flow";
-import { useScene } from '@motion-canvas/core/lib/utils';
+import { Layout, Txt, Rect } from "@motion-canvas/2d/lib/components";
+import { all } from "@motion-canvas/core/lib/flow";
 
 import { COLOR } from "../styles"
 import { easeInOutCubic } from "@motion-canvas/core/lib/tweening";
@@ -39,7 +36,7 @@ async function setup() {
   });
 
   outlineRects = new Array<Rect>(
-    createOutlineRect("What are Shaders Anyway?"),
+    createOutlineRect("What are shaders anyway?"),
     // #1: What is a Shader? (definition)
     // #2: Types of Shaders
 
@@ -51,7 +48,7 @@ async function setup() {
     // column 2
     // compute shaders (GPGPU) -> can be used for non graphics related stuff (e.g. physics simulation)
 
-    createOutlineRect("Introduction to Shaders"),
+    createOutlineRect("Introduction to shaders"),
     // #1: Coordinate Systems
     // #2: Basic Mesh Concepts
     // #3: Graphics Pipeline
@@ -60,9 +57,9 @@ async function setup() {
     // #6: Debugging Shaders
     // #7: What's Next
 
-    createOutlineRect("Writing your First Shader!"),
+    createOutlineRect("Writing your first shader!"),
 
-    createOutlineRect("Debugging & What's Next?"),
+    createOutlineRect("Debugging & what's next?"),
     // https://developer.nvidia.com/gpugems/gpugems/contributors
     // https://www.realtimerendering.com/raytracinggems/
   );

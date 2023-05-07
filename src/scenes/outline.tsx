@@ -47,7 +47,9 @@ export default makeScene2D(function* (view) {
     size: 0.0,
     fill: COLOR.BLACK,
     stroke: COLOR.WHITE,
-    lineWidth: 1.0,
+    shadowColor: COLOR.BLACK,
+    shadowBlur: 100.0,
+    lineWidth: 2.0,
   });
 
   transCircle.absolutePosition(outlineRects[0].absolutePosition);
@@ -57,7 +59,7 @@ export default makeScene2D(function* (view) {
   yield* beginSlide("What is a Shader?");
 
   yield* all(
-    transCircle.size(view.size.x() * 2.0, 1.0, easeInOutCubic),
-    transCircle.lineWidth(10.0, 1.0),
+    transCircle.size(view.size.x() * 2.0, 2.0, easeInOutCubic),
+    transCircle.lineWidth(20.0, 2.0, easeInOutCubic),
   )
 });
