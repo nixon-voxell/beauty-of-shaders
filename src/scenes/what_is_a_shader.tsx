@@ -305,6 +305,4 @@ export default makeScene2D(function* (view) {
     0.0, 1.0,
     2.0, easeInOutSine
   );
-
-  yield* beginSlide("");
 });
