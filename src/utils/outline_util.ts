@@ -50,6 +50,7 @@ async function setup() {
 
     // column 2
     // compute shaders (GPGPU) -> can be used for non graphics related stuff (e.g. physics simulation)
+
     createOutlineRect("Introduction to Shaders"),
     // #1: Coordinate Systems
     // #2: Basic Mesh Concepts
@@ -62,6 +63,8 @@ async function setup() {
     createOutlineRect("Writing your First Shader!"),
 
     createOutlineRect("Debugging & What's Next?"),
+    // https://developer.nvidia.com/gpugems/gpugems/contributors
+    // https://www.realtimerendering.com/raytracinggems/
   );
 
   outlineLayout = new Layout({
