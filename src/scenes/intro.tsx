@@ -4,7 +4,7 @@ import {beginSlide, createRef} from "@motion-canvas/core/lib/utils";
 import {all} from "@motion-canvas/core/lib/flow";
 import {easeInOutCubic, easeInOutQuart, easeInOutQuint} from "@motion-canvas/core/lib/tweening";
 import {createSignal} from "@motion-canvas/core/lib/signals";
-import { Color } from "@motion-canvas/core/lib/types";
+import { Color, Vector2 } from "@motion-canvas/core/lib/types";
 
 import {COLOR} from "../styles"
 
@@ -26,14 +26,12 @@ export default makeScene2D(function* (view) {
         fill={COLOR.GREEN}
         radius={40}
         smoothCorners
-        rotation={() => rotation() * rotationScale()}
         opacity={0.0}
       >
       </Rect>
       <Txt
         ref={title0}
         scale={0.3}
-        rotation={() => -rotation() * rotationScale()}
         opacity={0.0}
         fill={COLOR.BLACK}
       >
@@ -42,7 +40,6 @@ export default makeScene2D(function* (view) {
       <Txt
         ref={title1}
         scale={0.3}
-        rotation={() => -rotation() * rotationScale()}
         opacity={0.0}
         fill={COLOR.BLACK}
       >
@@ -91,5 +88,5 @@ export default makeScene2D(function* (view) {
     title1().fill(COLOR.WHITE, 0.6, easeInOutCubic),
   );
 
-  yield* title1().position.y(-400.0, 1.0, easeInOutCubic);
+  yield* title1().position(new Vector2(-500.0, -400.0), 1.0, easeInOutCubic);
 });
