@@ -52,9 +52,9 @@ export default makeScene2D(function* (view) {
     lineWidth: 2.0,
   });
 
-  transCircle.absolutePosition(outlineRects[0].absolutePosition);
-
   view.add(transCircle);
+
+  transCircle.absolutePosition(outlineRects[0].absolutePosition);
 
   yield* beginSlide("What is a Shader?");
 
