@@ -49,13 +49,11 @@ async function setup() {
     // compute shaders (GPGPU) -> can be used for non graphics related stuff (e.g. physics simulation)
 
     createOutlineRect("Introduction to shaders"),
-    // #1: Coordinate Systems
-    // #2: Basic Mesh Concepts
-    // #3: Graphics Pipeline
-    // #4: Vertex & Fragment Shaders
-    // #5: Writing your First Shader
-    // #6: Debugging Shaders
-    // #7: What's Next
+    // #0: Why do we need parallelism?
+    // #1: Graphics pipeline
+    // #2: Coordinate systems
+    // #3: Basic mesh concepts
+    // #4: Vertex & fragment shaders
 
     createOutlineRect("Writing your first shader!"),
 
