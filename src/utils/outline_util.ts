@@ -1,7 +1,7 @@
+import { COLOR } from "../styles"
+
 import { Layout, Txt, Rect } from "@motion-canvas/2d/lib/components";
 import { all } from "@motion-canvas/core/lib/flow";
-
-import { COLOR } from "../styles"
 import { easeInOutCubic } from "@motion-canvas/core/lib/tweening";
 import { Vector2 } from "@motion-canvas/core/lib/types";
 
