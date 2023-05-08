@@ -77,6 +77,18 @@ function* fadeVertContentRects(
   );
 }
 
+function* scaleVertContentRects(
+  content: VertContentRect, scale: number,
+  duration: number, seqDelay: number, timingFunc?: TimingFunction
+) {
+  yield* sequence(
+    seqDelay,
+    ...content.rects.map((rect) =>
+      rect.scale(scale, duration, timingFunc),
+    ),
+  );
+}
+
 function* sameTxtVertContentRects(
   content: VertContentRect, text: string,
   duration: number, seqDelay: number, timingFunc?: TimingFunction
@@ -102,32 +114,36 @@ function* changeTxtVertContentRects(
 }
 
 function* focusIdxVertContentRects(
-  content: VertContentRect, index: number, fadeOpacity: number, scale: number,
-  duration: number, timingFunc?: TimingFunction
+  content: VertContentRect, index: number, scaleUp: number,
+  fadeOpacity: number, scaleDown: number,
+  duration: number, seqDelay: number, timingFunc?: TimingFunction
 ) {
   yield* all(
-    content.rects[index].opacity(1.0, duration, easeInOutCubic),
-    content.rects[index].scale(scale, duration, easeInOutCubic),
+    content.rects[index].opacity(1.0, duration, timingFunc),
+    content.rects[index].scale(scaleUp, duration, timingFunc),
 
-    ...content.rects.slice(0, index).map((content) =>
-      all(
-        content.opacity(fadeOpacity, duration, easeInOutCubic),
-        content.scale(1.0, duration, easeInOutCubic),
-      )
-    ),
-    ...content.rects.slice(index + 1).map((content) =>
-      all(
-        content.opacity(fadeOpacity, duration, easeInOutCubic),
-        content.scale(1.0, duration, easeInOutCubic),
-      )
-    ),
+    sequence(
+      seqDelay,
+      ...content.rects.slice(0, index).map((content) =>
+        all(
+          content.opacity(fadeOpacity, duration, timingFunc),
+          content.scale(scaleDown, duration, timingFunc),
+        )
+      ),
+      ...content.rects.slice(index + 1).map((content) =>
+        all(
+          content.opacity(fadeOpacity, duration, timingFunc),
+          content.scale(scaleDown, duration, timingFunc),
+        )
+      ),
+    )
   );
 }
 
 export {
   ContentRectConfig, VertContentRect,
   createVertContentRects,
-  moveVertContentRects, fadeVertContentRects,
+  moveVertContentRects, fadeVertContentRects, scaleVertContentRects,
   sameTxtVertContentRects, changeTxtVertContentRects,
   focusIdxVertContentRects,
 }

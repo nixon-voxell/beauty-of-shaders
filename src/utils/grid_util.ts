@@ -59,9 +59,9 @@ function* animSquareGrid(
           const rect: Rect = rects[x][y];
 
           // skip if animation reached
-          // if (rect.opacity() == endOpacity) {
-          //   continue;
-          // }
+          if (rect.opacity() == endOpacity) {
+            continue;
+          }
 
           // constraint value to between 0.0 and 1.0
           const localValue = Math.min(Math.max(scaledValue - x - y, 0.0), 1.0);
