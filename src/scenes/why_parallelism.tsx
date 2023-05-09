@@ -6,21 +6,21 @@ import {
   moveVertContentRects, fadeVertContentRects,
   sameTxtVertContentRects, changeTxtVertContentRects, focusIdxVertContentRects, scaleVertContentRects
 } from "../utils/rect_util";
+import { animateDistanceLine, createDistanceLine } from "../utils/arrow_util";
 import { animSquareGrid, createSquareGrid, SquareGridConfig } from "../utils/grid_util";
 
 import {makeScene2D} from "@motion-canvas/2d/lib/scenes";
+import { CodeBlock } from '@motion-canvas/2d/lib/components/CodeBlock';
 import { Circle, Layout, Line, Rect, Txt } from "@motion-canvas/2d/lib/components";
 import { beginSlide } from "@motion-canvas/core/lib/utils";
-import { all, delay, sequence, waitFor } from "@motion-canvas/core/lib/flow";
-import { easeInOutCubic, easeInOutQuint, easeInOutSine } from "@motion-canvas/core/lib/tweening";
+import { all, chain, delay, loop, sequence } from "@motion-canvas/core/lib/flow";
+import { easeInOutCubic, easeInOutQuint, easeInOutSine, map, TimingFunction, tween } from "@motion-canvas/core/lib/tweening";
 import { Vector2 } from "@motion-canvas/core/lib/types";
 import { createSignal } from "@motion-canvas/core/lib/signals";
 
 export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);
   yield setup();
-
-  // const outlineLayout: Layout = new Layout({});
 
   view.add(outlineTitle);
   view.add(outlineLayout);
@@ -43,7 +43,7 @@ export default makeScene2D(function* (view) {
   // yield* beginSlide("Transition to outline");
 
   yield* all(
-    transCircle.size(0.0, 2.0, easeInOutQuint),
+    transCircle.size(0.0, 2.0, easeInOutCubic),
     transCircle.lineWidth(2.0, 2.0, easeInOutCubic),
   );
 
@@ -162,27 +162,20 @@ export default makeScene2D(function* (view) {
     ),
   );
 
-  const circleScale: number = 200.0;
-  const radius = createSignal(0.8);
+  const circleScale: number = 50.0;
+  const radius = createSignal(4.0);
 
   const renderCircle: Circle = new Circle({
     size: () => radius() * circleScale * 2.0,
     fill: COLOR.WHITE,
     opacity: 0.0,
   });
-  const circleLine: Line = new Line({
-    lineWidth: 10.0,
-    points: [
+  const circleLine: Line = createDistanceLine(
+    0.0, COLOR.BLACK, [
       Vector2.zero,
-      // highlight-next-line
       () => Vector2.right.scale(radius() * circleScale),
-    ],
-    stroke: COLOR.BLACK,
-    startArrow: true,
-    endArrow: true,
-    arrowSize: 20.0,
-    end: 0.0,
-  });
+    ]
+  );
 
   const radiusTxt: Txt = new Txt({
     y: 50.0,
@@ -198,32 +191,33 @@ export default makeScene2D(function* (view) {
   yield* beginSlide("Show circle");
 
   yield* all(
-    radius(1.0, 0.6, easeInOutCubic),
+    radius(4.5, 0.6, easeInOutCubic),
     renderCircle.opacity(1.0, 0.6, easeInOutCubic),
   )
 
   yield* beginSlide("Show radius");
 
   yield* all(
-    circleLine.end(1.0, 0.6, easeInOutCubic),
+    animateDistanceLine(circleLine, 0.6, easeInOutQuint),
     radiusTxt.text(() => radius().toFixed(2).toString(), 0.6, easeInOutCubic),
   )
 
   yield* beginSlide("Scale circle up/down");
 
-  yield* radius(2.0, 1.0, easeInOutCubic).to(1.0, 1.0, easeInOutCubic);
+  yield* radius(9.0, 1.0, easeInOutCubic).to(4.5, 1.0, easeInOutCubic);
 
   // create pixel grid
   const pixelParent: Circle = new Circle({
-    size: renderCircle.size().mul(1.2),
+    size: renderCircle.size(),
     fill: COLOR.TRANSPARENT,
   });
   renderCircle.add(pixelParent);
 
   const pixelConfig: SquareGridConfig = {
-    size: 10.0,
+    size: 9,
     gap: 2.0,
     padding: -2.0,
+    radius: 0.0,
   };
   const pixelGrid: Rect[][] = createSquareGrid(pixelConfig, COLOR.BLACK, pixelParent);
 
@@ -243,16 +237,264 @@ export default makeScene2D(function* (view) {
   yield* all(
     animSquareGrid(
       pixelConfig, pixelGrid,
-      pixelOriginSize * 0.2, pixelOriginSize,
+      pixelOriginSize * 0.6, pixelOriginSize,
       0.0, 0.7,
       2.0, easeInOutSine
     ),
   );
 
-  yield* beginSlide("Check pixel distance from circle center");
+  const firstPixel: Rect = pixelGrid[0][pixelConfig.size - 1];
+
+  function* scalePixel(
+    pixel: Rect, scale: number, opacity: number, zIndex: number,
+    duration: number = 0.6, timingFunc: TimingFunction = easeInOutCubic
+  ) {
+    yield* all(
+      pixel.scale(scale, duration, timingFunc),
+      pixel.opacity(opacity, duration, timingFunc),
+      pixel.zIndex(zIndex, duration, timingFunc),
+    );
+  }
+
+  // used for first pixel
+  const firstPixCoordTxt: Txt = new Txt({
+    position: firstPixel.position().sub(Vector2.down.scale(40.0)),
+    scale: 0.08,
+    fill: COLOR.YELLOW,
+    shadowColor: COLOR.BLACK,
+    shadowBlur: 10.0,
+    text: "coordinate",
+    opacity: 0.0
+  });
+
+  view.add(firstPixCoordTxt);
+
+  yield* beginSlide("Show first pixel");
 
   yield* all(
-    pixelGrid[0][0].scale(2.0, 0.6, easeInOutCubic),
-    pixelGrid[0][0].opacity(1.0, 0.6, easeInOutCubic),
+    scalePixel(firstPixel, 1.4, 1.0, 1.0),
   );
+
+  yield* all(
+    firstPixCoordTxt.position.y(firstPixCoordTxt.position.y() + 20.0, 0.5, easeInOutCubic),
+    firstPixCoordTxt.opacity(1.0, 0.4, easeInOutCubic),
+    firstPixCoordTxt.scale(0.1, 0.4, easeInOutCubic),
+  );
+
+  const measureLineDist: number = 80.0;
+
+  const pixelsHeightLine: Line = createDistanceLine(
+    new Vector2(-renderCircle.size.x() * 0.5 - measureLineDist, renderCircle.size.y() * 0.5),
+    COLOR.GREEN, [
+      0.0,
+      Vector2.down.scale(renderCircle.size.y()),
+    ]
+  );
+  const pixelsHeightTxt: Txt = new Txt({
+    position: new Vector2(-40.0, -renderCircle.size.y() * 0.5),
+    rotation: -90.0,
+    scale: 0.1,
+    fill: COLOR.GREEN,
+  });
+
+  const pixelsWidthLine: Line = createDistanceLine(
+    new Vector2(-renderCircle.size.x() * 0.5, -renderCircle.size.y() * 0.5 - measureLineDist),
+    COLOR.RED, [
+      0.0,
+      Vector2.right.scale(renderCircle.size.y()),
+    ]
+  );
+  const pixelsWidthTxt: Txt = new Txt({
+    position: new Vector2(renderCircle.size.y() * 0.5, -40.0),
+    scale: 0.1,
+    fill: COLOR.RED,
+  });
+
+  pixelsHeightLine.add(pixelsHeightTxt);
+  pixelsWidthLine.add(pixelsWidthTxt);
+  view.add(pixelsHeightLine);
+  view.add(pixelsWidthLine);
+
+  yield* beginSlide("Show pixel grid size");
+
+  yield* all(
+    animateDistanceLine(pixelsHeightLine, 0.6, easeInOutQuint),
+    pixelsHeightTxt.text("9 pixels", 0.6),
+  );
+  yield* all(
+    animateDistanceLine(pixelsWidthLine, 0.6, easeInOutQuint),
+    pixelsWidthTxt.text("9 pixels", 0.6),
+  );
+
+  yield* beginSlide("Show first pixel coordinate");
+
+  yield* firstPixCoordTxt.text("[0, 0]", 0.6);
+
+  // used for center pixel
+  const centerPixCoordTxt: Txt = firstPixCoordTxt.clone();
+  const gridCenterIdx: number = (pixelConfig.size - 1) / 2;
+  const centerPixel: Rect = pixelGrid[gridCenterIdx][gridCenterIdx];
+  centerPixCoordTxt.position(centerPixel.position());
+  centerPixCoordTxt.position.y(centerPixCoordTxt.position.y() + 60.0);
+  centerPixCoordTxt.text("");
+
+  view.add(centerPixCoordTxt);
+
+  yield* beginSlide("Show center pixel coordinate");
+
+  yield* all(
+    scalePixel(centerPixel, 1.4, 1.0, 1.0),
+    centerPixCoordTxt.text("[4, 4]", 0.6),
+  );
+
+  const measureLine: Line = createDistanceLine(
+    0.0, COLOR.YELLOW, [
+      firstPixel.position(),
+      centerPixel.position(),
+    ]
+  );
+  measureLine.shadowColor(COLOR.BLACK);
+  measureLine.shadowBlur(24.0);
+  const firstCenterDistCode: CodeBlock = new CodeBlock({
+    position: new Vector2(110.0, 150.0),
+    scale: 0.1,
+    language: "hlsl",
+    fill: COLOR.YELLOW,
+    shadowBlur: 10.0,
+    shadowColor: COLOR.BLACK,
+    // text: "sqrt((x1 - x0)^2 + (y1 - y0)^2)",
+  });
+
+  measureLine.add(firstCenterDistCode),
+  view.add(measureLine);
+
+  yield* beginSlide("Distance between 1st and center");
+
+  yield* all(
+    animateDistanceLine(measureLine, 0.6, easeInOutCubic),
+    firstCenterDistCode.code("sqrt((x1 - x0)^2 + (y1 - y0)^2)", 0.6),
+  );
+
+  yield* beginSlide("Replace variables with values");
+
+  yield* all(
+    firstCenterDistCode.code("sqrt((4 - 0)^2 + (4 - 0)^2)", 0.6),
+    firstCenterDistCode.position.x(firstCenterDistCode.position.x() - 20.0, 0.6, easeInOutCubic),
+  );
+
+  yield* beginSlide("Simplify equation #1");
+
+  yield* all(
+    firstCenterDistCode.code("sqrt(16 + 16)", 0.6),
+    firstCenterDistCode.position.x(firstCenterDistCode.position.x() - 90.0, 0.6, easeInOutCubic),
+  );
+  // yield* firstCenterDistTxt.position.x(firstCenterDistTxt.position.x() - 90.0, 0.6, easeInOutCubic);
+
+  yield* beginSlide("Simplify equation #2");
+
+  yield* all(
+    firstCenterDistCode.code("sqrt(32)", 0.6),
+    firstCenterDistCode.position.x(firstCenterDistCode.position.x() - 40.0, 0.6, easeInOutCubic),
+  );
+
+  yield* beginSlide("Simplify equation #3");
+
+  yield* all(
+    firstCenterDistCode.code("≈5.66", 0.6),
+    firstCenterDistCode.position.x(firstCenterDistCode.position.x() - 30.0, 0.6, easeInOutCubic),
+  );
+
+  const greaterThanRadiusTxt: Txt = new Txt({
+    position: new Vector2(20.0, 150.0),
+    scale: 0.14,
+    fill: COLOR.RED,
+    shadowBlur: 10.0,
+    shadowColor: COLOR.BLACK,
+    text: "> " + radius(),
+    opacity: 0.0,
+  });
+  const smallerThanRadiusTxt: Txt = new Txt({
+    scale: 0.14,
+    fill: COLOR.GREEN,
+    shadowBlur: 10.0,
+    shadowColor: COLOR.BLACK,
+    text: "≤ " + radius(),
+    opacity: 0.0,
+  });
+
+  view.add(greaterThanRadiusTxt);
+  view.add(smallerThanRadiusTxt);
+
+  yield* beginSlide("Show greater than radius");
+
+  yield* all(
+    greaterThanRadiusTxt.position.x(greaterThanRadiusTxt.position.x() + 20.0, 0.4, easeInOutCubic),
+    greaterThanRadiusTxt.opacity(1.0, 0.4, easeInOutCubic),
+  );
+
+  yield* beginSlide("Repeat the same process for each pixel");
+
+  // cleanup
+  yield* all(
+    animateDistanceLine(measureLine, 0.6, easeInOutCubic, 0.5, 0.5, 0.0, 0.1, 0.0),
+    firstCenterDistCode.code("", 0.6, easeInOutCubic),
+    centerPixCoordTxt.opacity(0.0, 0.6, easeInOutCubic),
+    firstPixCoordTxt.opacity(0.0, 0.6, easeInOutCubic),
+    greaterThanRadiusTxt.opacity(0.0, 0.6, easeInOutCubic),
+    scalePixel(firstPixel, 1.0, 0.7, 0.0, 0.6, easeInOutCubic),
+    scalePixel(centerPixel, 1.0, 0.7, 0.0, 0.6, easeInOutCubic),
+  )
+
+  const pixel00: Rect = pixelGrid[0][0];
+  measureLine.points([
+    pixel00.position,
+    centerPixel.position,
+  ]);
+  greaterThanRadiusTxt.position(pixel00.position().add(centerPixel.position()).scale(0.5));
+  smallerThanRadiusTxt.position(pixel00.position().add(centerPixel.position()).scale(0.5));
+
+  yield* animateDistanceLine(measureLine, 0.6, easeInOutCubic, 0.0, 1.0, 20.0, 0.0, 0.0);
+
+  const colorPixDuration: number = 0.15;
+  yield* chain(
+    ...pixelGrid.map((pixels) =>
+      chain(
+        ...pixels.map((pixel) =>
+          chain(
+            // move measure line to correct position
+            measureLine.points([
+              centerPixel.position,
+              pixel.position,
+            ], 0.0),
+
+            all(
+              scalePixel(pixel, 1.4, 1.0, 1.0, colorPixDuration, easeInOutCubic),
+              greaterThanRadiusTxt.position(
+                pixel.position().add(centerPixel.position()).scale(0.5), colorPixDuration, easeInOutCubic
+              ),
+              smallerThanRadiusTxt.position(
+                pixel.position().add(centerPixel.position()).scale(0.5), colorPixDuration, easeInOutCubic
+              ),
+
+              tween(colorPixDuration, () => {
+                const vec: Vector2 = centerPixel.position().sub(pixel.position());
+
+                if (vec.magnitude > radius() * circleScale) {
+                  greaterThanRadiusTxt.opacity(1.0);
+                  smallerThanRadiusTxt.opacity(0.0);
+                  pixel.fill(COLOR.BLACK);
+                } else {
+                  smallerThanRadiusTxt.opacity(1.0);
+                  greaterThanRadiusTxt.opacity(0.0);
+                  pixel.fill(COLOR.WHITE);
+                }
+              }),
+            ),
+
+            scalePixel(pixel, 1.0, 0.7, 0.0, colorPixDuration, easeInOutCubic),
+          )
+        )
+      )
+    )
+  )
 });

@@ -101,17 +101,20 @@ export default makeScene2D(function* (view) {
     size: 4,
     gap: 30,
     padding: 100,
+    radius: 10.0,
   };
   const gridConfig1: SquareGridConfig = {
     size: 6,
     gap: 20,
     padding: 100,
+    radius: 8.0,
   };
 
   const gridConfig: SquareGridConfig = {
     size: 11,
     gap: 10,
     padding: 100,
+    radius: 6.0,
   };
 
   const cores0: Rect[][] = createSquareGrid(gridConfig0, COLOR.BLACK, gpuDevice);

@@ -1,4 +1,3 @@
-import { COLOR } from "../styles";
 import { Layout, Rect } from "@motion-canvas/2d/lib/components";
 import { Vector2 } from "@motion-canvas/core/lib/types";
 import type { TimingFunction } from "@motion-canvas/core/lib/tweening";
@@ -8,6 +7,7 @@ type SquareGridConfig = {
   size: number,
   gap: number,
   padding: number,
+  radius: number,
 }
 
 function createSquareGrid(gridConfig: SquareGridConfig, defaultColor: string, parent: Layout): Rect[][] {
@@ -16,7 +16,7 @@ function createSquareGrid(gridConfig: SquareGridConfig, defaultColor: string, pa
 
   const rectRef: Rect = new Rect({
     size: rectWidth,
-    radius: 10.0,
+    radius: gridConfig.radius,
     fill: defaultColor,
     opacity: 0.0,
   });
