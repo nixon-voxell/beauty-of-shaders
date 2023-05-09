@@ -151,10 +151,11 @@ export default makeScene2D(function* (view) {
       all(
         // move 'Why do we need parallelism to top left'
         rect0.scale(1.0, 0.6, easeInOutCubic),
-        rect0.size(rect0.size().mul(0.8), 0.6, easeInOutCubic),
-        rect0.position(new Vector2(-1000.0, 0.0), 0.6, easeInOutCubic),
+        rect0.size(rect0.size().mul(0.7), 0.6, easeInOutCubic),
+        rect0.position(new Vector2(-1100.0, -40.0), 0.6, easeInOutCubic),
+        rect0.opacity(0.6, 0.6, easeInOutCubic),
 
-        txt0.scale(0.1, 0.6, easeInOutCubic),
+        txt0.scale(0.09, 0.6, easeInOutCubic),
       )
     ),
   );
