@@ -6,13 +6,15 @@ import {
   moveVertContentRects, fadeVertContentRects,
   sameTxtVertContentRects, changeTxtVertContentRects, focusIdxVertContentRects, scaleVertContentRects
 } from "../utils/rect_util";
+import { animSquareGrid, createSquareGrid, SquareGridConfig } from "../utils/grid_util";
 
 import {makeScene2D} from "@motion-canvas/2d/lib/scenes";
-import { Circle, Layout, Rect, Txt } from "@motion-canvas/2d/lib/components";
+import { Circle, Layout, Line, Rect, Txt } from "@motion-canvas/2d/lib/components";
 import { beginSlide } from "@motion-canvas/core/lib/utils";
-import { all, delay, sequence } from "@motion-canvas/core/lib/flow";
-import { easeInOutCubic, easeInOutQuint } from "@motion-canvas/core/lib/tweening";
+import { all, delay, sequence, waitFor } from "@motion-canvas/core/lib/flow";
+import { easeInOutCubic, easeInOutQuint, easeInOutSine } from "@motion-canvas/core/lib/tweening";
 import { Vector2 } from "@motion-canvas/core/lib/types";
+import { createSignal } from "@motion-canvas/core/lib/signals";
 
 export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);
@@ -123,7 +125,7 @@ export default makeScene2D(function* (view) {
   const rect0: Rect = topicRects.rects[0];
   const txt0: Txt = topicRects.txts[0];
 
-  yield* beginSlide("Circle zoom in transition");
+  yield* beginSlide("Move to top left");
 
   yield* all(
     // fade out outline
@@ -158,5 +160,99 @@ export default makeScene2D(function* (view) {
         txt0.scale(0.09, 0.6, easeInOutCubic),
       )
     ),
+  );
+
+  const circleScale: number = 200.0;
+  const radius = createSignal(0.8);
+
+  const renderCircle: Circle = new Circle({
+    size: () => radius() * circleScale * 2.0,
+    fill: COLOR.WHITE,
+    opacity: 0.0,
+  });
+  const circleLine: Line = new Line({
+    lineWidth: 10.0,
+    points: [
+      Vector2.zero,
+      // highlight-next-line
+      () => Vector2.right.scale(radius() * circleScale),
+    ],
+    stroke: COLOR.BLACK,
+    startArrow: true,
+    endArrow: true,
+    arrowSize: 20.0,
+    end: 0.0,
+  });
+
+  const radiusTxt: Txt = new Txt({
+    y: 50.0,
+    x: () => radius() * circleScale * 0.5,
+    scale: 0.12,
+    fill: COLOR.BLACK,
+  });
+
+  view.add(renderCircle);
+  renderCircle.add(circleLine);
+  circleLine.add(radiusTxt);
+
+  yield* beginSlide("Show circle");
+
+  yield* all(
+    radius(1.0, 0.6, easeInOutCubic),
+    renderCircle.opacity(1.0, 0.6, easeInOutCubic),
+  )
+
+  yield* beginSlide("Show radius");
+
+  yield* all(
+    circleLine.end(1.0, 0.6, easeInOutCubic),
+    radiusTxt.text(() => radius().toFixed(2).toString(), 0.6, easeInOutCubic),
+  )
+
+  yield* beginSlide("Scale circle up/down");
+
+  yield* radius(2.0, 1.0, easeInOutCubic).to(1.0, 1.0, easeInOutCubic);
+
+  // create pixel grid
+  const pixelParent: Circle = new Circle({
+    size: renderCircle.size().mul(1.2),
+    fill: COLOR.TRANSPARENT,
+  });
+  renderCircle.add(pixelParent);
+
+  const pixelConfig: SquareGridConfig = {
+    size: 10.0,
+    gap: 2.0,
+    padding: -2.0,
+  };
+  const pixelGrid: Rect[][] = createSquareGrid(pixelConfig, COLOR.BLACK, pixelParent);
+
+  for (var x = 0; x < pixelConfig.size; x++) {
+    for (var y = 0; y < pixelConfig.size; y++) {
+      const pixel: Rect = pixelGrid[x][y];
+
+      pixel.lineWidth(2.0);
+      pixel.stroke(COLOR.BLUE);
+    }
+  }
+
+  const pixelOriginSize: number = pixelGrid[0][0].width();
+
+  yield* beginSlide("Create pixel grid");
+
+  yield* all(
+    animSquareGrid(
+      pixelConfig, pixelGrid,
+      pixelOriginSize * 0.2, pixelOriginSize,
+      0.0, 0.7,
+      2.0, easeInOutSine
+    ),
+  );
+
+  yield* beginSlide("Check pixel distance from circle center");
+
+  yield* all(
+    pixelGrid[0][0].scale(2.0, 0.6, easeInOutCubic),
+    pixelGrid[0][0].opacity(1.0, 0.6, easeInOutCubic),
   );
 });

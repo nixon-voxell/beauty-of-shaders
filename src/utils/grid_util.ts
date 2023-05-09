@@ -1,5 +1,5 @@
 import { COLOR } from "../styles";
-import { Rect } from "@motion-canvas/2d/lib/components";
+import { Layout, Rect } from "@motion-canvas/2d/lib/components";
 import { Vector2 } from "@motion-canvas/core/lib/types";
 import type { TimingFunction } from "@motion-canvas/core/lib/tweening";
 import { map, tween } from "@motion-canvas/core/lib/tweening";
@@ -10,7 +10,7 @@ type SquareGridConfig = {
   padding: number,
 }
 
-function createSquareGrid(gridConfig: SquareGridConfig, defaultColor: string, parent: Rect): Rect[][] {
+function createSquareGrid(gridConfig: SquareGridConfig, defaultColor: string, parent: Layout): Rect[][] {
   const gridWidth: number = parent.size.x() - gridConfig.padding;
   const rectWidth: number = gridWidth / gridConfig.size - gridConfig.gap;
 
