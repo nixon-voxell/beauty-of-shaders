@@ -1,10 +1,7 @@
-import {
-  Layout, Txt, Rect
-} from "@motion-canvas/2d/lib/components";
-import { all, delay, sequence, waitFor } from "@motion-canvas/core/lib/flow";
-import { useScene } from '@motion-canvas/core/lib/utils';
-
 import { COLOR } from "../styles"
+
+import { Layout, Txt, Rect } from "@motion-canvas/2d/lib/components";
+import { all } from "@motion-canvas/core/lib/flow";
 import { easeInOutCubic } from "@motion-canvas/core/lib/tweening";
 import { Vector2 } from "@motion-canvas/core/lib/types";
 
@@ -39,7 +36,7 @@ async function setup() {
   });
 
   outlineRects = new Array<Rect>(
-    createOutlineRect("What are Shaders Anyway?"),
+    createOutlineRect("What are shaders anyway?"),
     // #1: What is a Shader? (definition)
     // #2: Types of Shaders
 
@@ -50,18 +47,19 @@ async function setup() {
 
     // column 2
     // compute shaders (GPGPU) -> can be used for non graphics related stuff (e.g. physics simulation)
-    createOutlineRect("Introduction to Shaders"),
-    // #1: Coordinate Systems
-    // #2: Basic Mesh Concepts
-    // #3: Graphics Pipeline
-    // #4: Vertex & Fragment Shaders
-    // #5: Writing your First Shader
-    // #6: Debugging Shaders
-    // #7: What's Next
 
-    createOutlineRect("Writing your First Shader!"),
+    createOutlineRect("Introduction to shaders"),
+    // #0: Why do we need parallelism?
+    // #1: Graphics pipeline
+    // #2: Coordinate systems
+    // #3: Basic mesh concepts
+    // #4: Vertex & fragment shaders
 
-    createOutlineRect("Debugging & What's Next?"),
+    createOutlineRect("Writing your first shader!"),
+
+    createOutlineRect("Debugging & what's next?"),
+    // https://developer.nvidia.com/gpugems/gpugems/contributors
+    // https://www.realtimerendering.com/raytracinggems/
   );
 
   outlineLayout = new Layout({

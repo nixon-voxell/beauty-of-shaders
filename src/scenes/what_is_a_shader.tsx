@@ -18,6 +18,7 @@ export default makeScene2D(function* (view) {
     size: new Vector2(240.0, 300.0),
     radius: 50.0,
     fill: COLOR.BLUE,
+    shadowColor: COLOR.BLUE_SHADOW,
     opacity: 0.0,
   });
 
@@ -83,7 +84,6 @@ export default makeScene2D(function* (view) {
   });
 
   const gpuTxt: Txt = new Txt({
-    // y: -gpuDevice.size.y() * 0.5 - 50.0,
     scale: 0.3,
     fill: COLOR.BLACK,
   });
@@ -101,17 +101,20 @@ export default makeScene2D(function* (view) {
     size: 4,
     gap: 30,
     padding: 100,
+    radius: 10.0,
   };
   const gridConfig1: SquareGridConfig = {
     size: 6,
     gap: 20,
     padding: 100,
+    radius: 8.0,
   };
 
   const gridConfig: SquareGridConfig = {
     size: 11,
     gap: 10,
     padding: 100,
+    radius: 6.0,
   };
 
   const cores0: Rect[][] = createSquareGrid(gridConfig0, COLOR.BLACK, gpuDevice);
@@ -136,10 +139,9 @@ export default makeScene2D(function* (view) {
       const distColor: number = Math.trunc(dist * 255);
 
       coreProg.fill(COLOR.BLUE);
-      coreIn.fill(`rgb(${uvColor.x}, ${uvColor.y}, 0)`);
+      const coreInColor = `rgb(${uvColor.x}, ${uvColor.y}, 0)`;
+      coreIn.fill(coreInColor);
       coreOut.fill(`rgb(${distColor}, ${distColor}, ${distColor})`);
-
-      // coreProg.opacity(1.0);
 
       gpuDevice.add(coreProg);
       gpuDevice.add(coreIn);
@@ -199,6 +201,7 @@ export default makeScene2D(function* (view) {
 
   yield* beginSlide("Show GPU programs");
 
+  yield* shaderRect.shadowBlur(100.0, 0.6, easeInOutCubic);
   yield* animSquareGrid(
     gridConfig, corePrograms,
     coreOriginSize * 0.2, coreOriginSize * 0.7,
@@ -213,6 +216,8 @@ export default makeScene2D(function* (view) {
     size: 140.0,
     radius: 30.0,
     fill: "rgb(200, 200, 0)",
+    shadowColor: "rgba(200, 200, 0, 0.6)",
+    shadowBlur: 100.0,
     opacity: 0.0,
   });
   const inputTxt: Txt = new Txt({
@@ -244,6 +249,8 @@ export default makeScene2D(function* (view) {
     size: 140.0,
     radius: 30.0,
     fill: COLOR.WHITE,
+    shadowColor: COLOR.WHITE_SHADOW,
+    shadowBlur: 100.0,
     opacity: 0.0,
   });
   const outputTxt: Txt = inputTxt.clone();
@@ -257,7 +264,10 @@ export default makeScene2D(function* (view) {
 
   yield* beginSlide("Add input to shader");
 
-  yield* shaderRect.position.y(0.0, 0.6, easeInOutCubic);
+  yield* all(
+    shaderRect.position.y(0.0, 0.6, easeInOutCubic),
+    shaderRect.shadowBlur(0.0, 0.6, easeInOutCubic),
+  )
   yield* all(
     rectScaleReview(inputRect, 0.6, 0.9, easeInOutCubic),
     inputTxt.text("Input", 0.6),
@@ -265,8 +275,8 @@ export default makeScene2D(function* (view) {
       0.3,
       sequence(
         0.1,
-        inputLine.end(1.0, 0.6),
-        inputLine.arrowSize(20.0, 0.6),
+        inputLine.end(1.0, 0.6, easeInOutCubic),
+        inputLine.arrowSize(20.0, 0.6, easeInOutCubic),
       )
     ),
   );
@@ -282,6 +292,7 @@ export default makeScene2D(function* (view) {
 
   yield* beginSlide("Add output from shader");
 
+  yield *inputRect.shadowBlur(0.0, 0.6, easeInOutCubic);
   yield* all(
     delay(
       0.3,
@@ -292,8 +303,8 @@ export default makeScene2D(function* (view) {
     ),
     sequence(
       0.1,
-      outputLine.end(1.0, 0.6),
-      outputLine.arrowSize(20.0, 0.6),
+      outputLine.end(1.0, 0.6, easeInOutCubic),
+      outputLine.arrowSize(20.0, 0.6, easeInOutCubic),
     )
   );
 
@@ -306,5 +317,8 @@ export default makeScene2D(function* (view) {
     2.0, easeInOutSine
   );
 
-  yield* beginSlide("");
+  yield* beginSlide("Fade out transition");
+
+  yield* outputRect.shadowBlur(0.0, 0.6, easeInOutCubic);
+  yield* view.opacity(0.0, 0.6, easeInOutCubic);
 });

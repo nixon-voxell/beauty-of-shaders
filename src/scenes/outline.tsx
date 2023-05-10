@@ -5,7 +5,7 @@ import {makeScene2D} from "@motion-canvas/2d/lib/scenes";
 import { Circle } from "@motion-canvas/2d/lib/components";
 import { beginSlide } from "@motion-canvas/core/lib/utils";
 import { all, sequence } from "@motion-canvas/core/lib/flow";
-import { easeInOutCubic } from "@motion-canvas/core/lib/tweening";
+import { easeInOutCubic, easeInOutQuint } from "@motion-canvas/core/lib/tweening";
 
 export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);
@@ -47,17 +47,19 @@ export default makeScene2D(function* (view) {
     size: 0.0,
     fill: COLOR.BLACK,
     stroke: COLOR.WHITE,
-    lineWidth: 1.0,
+    shadowColor: COLOR.BLACK,
+    shadowBlur: 100.0,
+    lineWidth: 2.0,
   });
-
-  transCircle.absolutePosition(outlineRects[0].absolutePosition);
 
   view.add(transCircle);
 
-  yield* beginSlide("What is a Shader?");
+  transCircle.absolutePosition(outlineRects[0].absolutePosition);
+
+  yield* beginSlide("Circle zoom in transition");
 
   yield* all(
-    transCircle.size(view.size.x() * 2.0, 1.0, easeInOutCubic),
-    transCircle.lineWidth(10.0, 1.0),
+    transCircle.size(view.size.x() * 2.0, 2.0, easeInOutQuint),
+    transCircle.lineWidth(20.0, 2.0, easeInOutQuint),
   )
 });
