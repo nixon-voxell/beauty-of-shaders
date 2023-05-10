@@ -19,7 +19,7 @@ type ContentRect = {
 }
 
 function createContentRect(
-  cont: string, position: SignalValue<PossibleVector2<number>>,
+  cont: SignalValue<string>, position: SignalValue<PossibleVector2<number>>,
   config: ContentRectConfig, opacity: number,
   parent: Layout
 ): ContentRect {
@@ -45,11 +45,19 @@ function createContentRect(
 }
 
 function* moveContentRect(
-  content: ContentRect, movement: Vector2,
+  content: ContentRect, movement: PossibleVector2<number>,
   duration: number, timingFunc?: TimingFunction
 ) {
   const rect: Rect = content.rect;
   yield* rect.position(rect.position().add(movement), duration, timingFunc);
+}
+
+function* positionContentRect(
+  content: ContentRect, position: PossibleVector2<number>,
+  duration: number, timingFunc?: TimingFunction
+) {
+  const rect: Rect = content.rect;
+  yield* rect.position(position, duration, timingFunc);
 }
 
 function* fadeContentRect(
@@ -68,7 +76,7 @@ function* scaleContentRect(
   yield* rect.scale(scale, duration, timingFunc);
 }
 
-function* changeTxtContentRect(
+function* changeContentTxt(
   content: ContentRect, cont: string,
   duration: number, timingFunc?: TimingFunction
 ) {
@@ -76,9 +84,18 @@ function* changeTxtContentRect(
   yield* txt.text(cont, duration, timingFunc);
 }
 
+function* scaleContentTxt(
+  content: ContentRect, scale: number,
+  duration: number, timingFunc?: TimingFunction
+) {
+  const txt: Txt = content.txt;
+  yield* txt.scale(scale, duration, timingFunc);
+}
+
 export {
   ContentRect, createContentRect,
-  moveContentRect, fadeContentRect, scaleContentRect, changeTxtContentRect,
+  positionContentRect, moveContentRect, fadeContentRect, scaleContentRect,
+  changeContentTxt, scaleContentTxt,
 }
 
 type VertContentRect = {

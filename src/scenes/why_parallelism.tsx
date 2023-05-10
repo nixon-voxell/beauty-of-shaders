@@ -54,9 +54,9 @@ export default makeScene2D(function* (view) {
 
   const topics = [
     "0. Why do we need parallelism?",
-    "1. Graphics pipeline",
-    "2. Coordinate systems",
-    "3. Basic mesh concepts",
+    "1. Coordinate systems",
+    "2. Basic mesh concepts",
+    "3. Graphics pipeline",
     "4. Vertex & fragment shaders"
   ];
 
@@ -203,7 +203,7 @@ export default makeScene2D(function* (view) {
     radiusTxt.text(() => radius().toFixed(2).toString(), 0.6, easeInOutCubic),
   )
 
-  yield* beginSlide("Scale circle up/down");
+  // yield* beginSlide("Scale circle up/down");
 
   yield* radius(9.0, 1.0, easeInOutCubic).to(4.5, 1.0, easeInOutCubic);
 
@@ -433,6 +433,8 @@ export default makeScene2D(function* (view) {
     greaterThanRadiusTxt.opacity(1.0, 0.4, easeInOutCubic),
   );
 
+  yield* beginSlide("Repeat the same process for each pixel");
+
   // cleanup
   yield* all(
     animateDistanceLine(measureLine, 0.6, easeInOutCubic, 0.5, 0.5, 0.0, 0.1, 0.0),
@@ -479,8 +481,6 @@ export default makeScene2D(function* (view) {
 
   pixelsHeightTxtClone.opacity(0.0);
   pixelsWidthTxtClone.opacity(0.0);
-
-  yield* beginSlide("Repeat the same process for each pixel");
 
   yield* animateDistanceLine(measureLine, 0.6, easeInOutCubic, 0.0, 1.0, 20.0, 0.0, 0.0);
   yield* scaleContentRect(verbalCont, 0.8, 0.0, easeInOutCubic);
