@@ -1,8 +1,8 @@
 import { Txt, Rect, Layout } from "@motion-canvas/2d/lib/components";
 import { all, sequence } from "@motion-canvas/core/lib/flow";
-import { easeInOutCubic } from "@motion-canvas/core/lib/tweening";
-import { Vector2 } from "@motion-canvas/core/lib/types";
+import { PossibleVector2, Vector2 } from "@motion-canvas/core/lib/types";
 import type { TimingFunction } from "@motion-canvas/core/lib/tweening";
+import { SignalValue } from "@motion-canvas/core/lib/signals";
 
 type ContentRectConfig = {
   size: Vector2,
@@ -13,6 +13,74 @@ type ContentRectConfig = {
   txtFill: string,
 }
 
+type ContentRect = {
+  rect: Rect,
+  txt: Txt,
+}
+
+function createContentRect(
+  cont: string, position: SignalValue<PossibleVector2<number>>,
+  config: ContentRectConfig, opacity: number,
+  parent: Layout
+): ContentRect {
+  const content: ContentRect = {
+    rect: new Rect({
+      position,
+      size: config.size,
+      radius: config.radius,
+      fill: config.fill,
+      opacity: opacity,
+    }),
+    txt: new Txt({
+      text: cont,
+      scale: config.txtScale,
+      fill: config.txtFill,
+    }),
+  }
+
+  content.rect.add(content.txt);
+  parent.add(content.rect);
+
+  return content;
+}
+
+function* moveContentRect(
+  content: ContentRect, movement: Vector2,
+  duration: number, timingFunc?: TimingFunction
+) {
+  const rect: Rect = content.rect;
+  yield* rect.position(rect.position().add(movement), duration, timingFunc);
+}
+
+function* fadeContentRect(
+  content: ContentRect, opacity: number,
+  duration: number, timingFunc?: TimingFunction
+) {
+  const rect: Rect = content.rect;
+  yield* rect.opacity(opacity, duration, timingFunc);
+}
+
+function* scaleContentRect(
+  content: ContentRect, scale: number,
+  duration: number, timingFunc?: TimingFunction
+) {
+  const rect: Rect = content.rect;
+  yield* rect.scale(scale, duration, timingFunc);
+}
+
+function* changeTxtContentRect(
+  content: ContentRect, cont: string,
+  duration: number, timingFunc?: TimingFunction
+) {
+  const txt: Txt = content.txt;
+  yield* txt.text(cont, duration, timingFunc);
+}
+
+export {
+  ContentRect, createContentRect,
+  moveContentRect, fadeContentRect, scaleContentRect, changeTxtContentRect,
+}
+
 type VertContentRect = {
   rects: Rect[],
   txts: Txt[],
@@ -20,7 +88,7 @@ type VertContentRect = {
 
 function createVertContentRects(
   contTxts: string[],
-  config: ContentRectConfig, initialOpacity: number,
+  config: ContentRectConfig, opacity: number,
   parent: Layout
 ): VertContentRect {
   const contents: VertContentRect = {
@@ -34,7 +102,7 @@ function createVertContentRects(
       size: config.size,
       radius: config.radius,
       fill: config.fill,
-      opacity: initialOpacity,
+      opacity: opacity,
     });
 
     const txt: Txt = new Txt({

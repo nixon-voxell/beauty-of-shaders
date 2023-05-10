@@ -4,7 +4,7 @@ import {
   ContentRectConfig, VertContentRect,
   createVertContentRects,
   moveVertContentRects, fadeVertContentRects,
-  sameTxtVertContentRects, changeTxtVertContentRects, focusIdxVertContentRects, scaleVertContentRects
+  sameTxtVertContentRects, changeTxtVertContentRects, focusIdxVertContentRects, scaleVertContentRects, ContentRect, createContentRect, scaleContentRect, fadeContentRect
 } from "../utils/rect_util";
 import { animateDistanceLine, createDistanceLine } from "../utils/arrow_util";
 import { animSquareGrid, createSquareGrid, SquareGridConfig } from "../utils/grid_util";
@@ -13,10 +13,11 @@ import {makeScene2D} from "@motion-canvas/2d/lib/scenes";
 import { CodeBlock } from '@motion-canvas/2d/lib/components/CodeBlock';
 import { Circle, Layout, Line, Rect, Txt } from "@motion-canvas/2d/lib/components";
 import { beginSlide } from "@motion-canvas/core/lib/utils";
-import { all, chain, delay, loop, sequence } from "@motion-canvas/core/lib/flow";
-import { easeInOutCubic, easeInOutQuint, easeInOutSine, map, TimingFunction, tween } from "@motion-canvas/core/lib/tweening";
+import { all, chain, delay, sequence } from "@motion-canvas/core/lib/flow";
+import { easeInOutCubic, easeInOutQuint, easeInOutSine, TimingFunction, tween } from "@motion-canvas/core/lib/tweening";
 import { Vector2 } from "@motion-canvas/core/lib/types";
 import { createSignal } from "@motion-canvas/core/lib/signals";
+import { cancel, ThreadGenerator } from "@motion-canvas/core/lib/threading";
 
 export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);
@@ -432,8 +433,6 @@ export default makeScene2D(function* (view) {
     greaterThanRadiusTxt.opacity(1.0, 0.4, easeInOutCubic),
   );
 
-  yield* beginSlide("Repeat the same process for each pixel");
-
   // cleanup
   yield* all(
     animateDistanceLine(measureLine, 0.6, easeInOutCubic, 0.5, 0.5, 0.0, 0.1, 0.0),
@@ -453,10 +452,41 @@ export default makeScene2D(function* (view) {
   greaterThanRadiusTxt.position(pixel00.position().add(centerPixel.position()).scale(0.5));
   smallerThanRadiusTxt.position(pixel00.position().add(centerPixel.position()).scale(0.5));
 
+  const verbalConfig: ContentRectConfig = {
+    size: new Vector2(460.0, 220.0),
+    gap: 0.0,
+    radius: 20.0,
+    fill: COLOR.WHITE,
+    txtScale: 0.12,
+    txtFill: COLOR.BLACK,
+  }
+
+  const verbalCont: ContentRect = createContentRect(
+    "", Vector2.right.scale(560.0), verbalConfig, 0.0, view
+  );
+
+  const pixelsHeightTxtClone = pixelsHeightTxt.clone();
+  const pixelsWidthTxtClone = pixelsWidthTxt.clone();
+
+  const calculationLayout: Layout = new Layout({});
+
+  view.add(calculationLayout);
+
+  calculationLayout.add(pixelsHeightTxtClone);
+  calculationLayout.add(pixelsWidthTxtClone);
+  pixelsHeightTxtClone.absolutePosition(pixelsHeightTxt.absolutePosition());
+  pixelsWidthTxtClone.absolutePosition(pixelsWidthTxt.absolutePosition());
+
+  pixelsHeightTxtClone.opacity(0.0);
+  pixelsWidthTxtClone.opacity(0.0);
+
+  yield* beginSlide("Repeat the same process for each pixel");
+
   yield* animateDistanceLine(measureLine, 0.6, easeInOutCubic, 0.0, 1.0, 20.0, 0.0, 0.0);
+  yield* scaleContentRect(verbalCont, 0.8, 0.0, easeInOutCubic);
 
   const colorPixDuration: number = 0.15;
-  yield* chain(
+  const drawCirclePixelTask: ThreadGenerator = yield chain(
     ...pixelGrid.map((pixels) =>
       chain(
         ...pixels.map((pixel) =>
@@ -493,8 +523,132 @@ export default makeScene2D(function* (view) {
 
             scalePixel(pixel, 1.0, 0.7, 0.0, colorPixDuration, easeInOutCubic),
           )
-        )
-      )
-    )
+        ),
+      ),
+    ),
+  );
+
+  yield* beginSlide("Imagin doing this the serial way");
+
+  yield* all(
+    scaleContentRect(verbalCont, 1.0, 0.6, easeInOutCubic),
+    fadeContentRect(verbalCont, 1.0, 0.6, easeInOutCubic),
+    verbalCont.txt.text("Imagine doing this\none by one", 0.6),
+  );
+
+  yield* verbalCont.txt.text("Imagine doing this\none by one\n(the serial way)", 0.6);
+
+  yield* beginSlide("x axis pixels");
+
+  yield* sequence(
+    0.3,
+    pixelsWidthTxtClone.opacity(1.0, 0.6, easeInOutCubic),
+    all(
+      pixelsWidthTxtClone.rotation(0.0, 0.6, easeInOutCubic),
+      pixelsWidthTxtClone.position(verbalCont.rect.position().add(new Vector2(-160.0, 200.0)), 0.6, easeInOutCubic),
+    ),
+  );
+
+  yield* beginSlide("y axis pixels");
+
+  yield* sequence(
+    0.3,
+    pixelsHeightTxtClone.opacity(1.0, 0.6, easeInOutCubic),
+    all(
+      pixelsHeightTxtClone.rotation(0.0, 0.6, easeInOutCubic),
+      pixelsHeightTxtClone.position(verbalCont.rect.position().addY(200.0), 0.6, easeInOutCubic),
+    ),
   )
+
+  const multiplyTxt: Txt = new Txt({
+    position: pixelsWidthTxtClone.position().addX(80.0),
+    scale: 0.1,
+    fill: COLOR.WHITE,
+    text: "x",
+    opacity: 0.0,
+  });
+  const equalTxt: Txt = new Txt({
+    position: pixelsHeightTxtClone.position().addX(80.0),
+    scale: 0.1,
+    fill: COLOR.WHITE,
+    text: "=",
+    opacity: 0.0,
+  });
+  const resultTxt: Txt = new Txt({
+    position: pixelsHeightTxtClone.position().addX(170.0),
+    scale: 0.1,
+    fill: COLOR.YELLOW,
+    text: "81 pixels",
+    opacity: 0.0,
+  });
+
+  const underlineRect: Rect = new Rect({
+    position: pixelsHeightTxtClone.position().add(new Vector2(114.0, 30.0)),
+    size: new Vector2(0.0, 6.0),
+    fill: COLOR.YELLOW,
+  });
+  calculationLayout.add(multiplyTxt);
+  calculationLayout.add(equalTxt);
+  calculationLayout.add(resultTxt);
+  calculationLayout.add(underlineRect);
+
+  yield* beginSlide("Multiply pixels");
+
+  yield* sequence(
+    0.3,
+    multiplyTxt.opacity(1.0, 0.6, easeInOutCubic),
+    equalTxt.opacity(1.0, 0.6, easeInOutCubic),
+    resultTxt.opacity(1.0, 0.6, easeInOutCubic),
+  );
+
+  yield* beginSlide("Modern display");
+
+  yield* sequence(
+    0.5,
+    all(
+      pixelsWidthTxtClone.text("1920", 0.6),
+      multiplyTxt.position.x(multiplyTxt.position.x() - 30.0, 0.6, easeInOutCubic),
+    ),
+    all(
+      pixelsHeightTxtClone.text("1080", 0.6),
+      pixelsHeightTxtClone.position.x(pixelsHeightTxtClone.position.x() - 60.0, 0.6, easeInOutCubic),
+    ),
+    all(
+      resultTxt.text("2,073,600", 0.6),
+      resultTxt.position.x(resultTxt.position.x() - 60.0, 0.6),
+      equalTxt.position.x(equalTxt.position.x() - 90.0, 0.6),
+    ),
+    all(
+      resultTxt.scale(0.15, 0.6, easeInOutCubic),
+      underlineRect.size.x(200.0, 0.6, easeInOutCubic),
+    )
+  );
+
+  yield* beginSlide("Stop drawing circle, transition out");
+
+  cancel(drawCirclePixelTask);
+
+  yield* sequence(
+    0.1,
+    all(
+      scaleContentRect(verbalCont, 0.8, 0.6, easeInOutCubic),
+      fadeContentRect(verbalCont, 0.0, 0.6, easeInOutCubic),
+    ),
+    calculationLayout.opacity(0.0, 0.6, easeInOutCubic),
+    all(
+      animateDistanceLine(measureLine, 0.6, easeInOutCubic, 0.5, 0.5, 0.0, 0.1, 0.0),
+      greaterThanRadiusTxt.opacity(0.0, 0.6, easeInOutCubic),
+      smallerThanRadiusTxt.opacity(0.0, 0.6, easeInOutCubic),
+    ),
+    // fade out circle
+    all(
+      renderCircle.opacity(0.0, 0.6, easeInOutCubic),
+    ),
+    all(
+      animateDistanceLine(pixelsHeightLine, 0.6, easeInOutCubic, 0.5, 0.5, 0.0, 0.1, 0.0),
+      pixelsWidthTxt.text("", 0.6),
+      animateDistanceLine(pixelsWidthLine, 0.6, easeInOutCubic, 0.5, 0.5, 0.0, 0.1, 0.0),
+      pixelsHeightTxt.text("", 0.6),
+    ),
+  );
 });
