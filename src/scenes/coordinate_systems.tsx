@@ -53,7 +53,7 @@ export default makeScene2D(function* (view) {
     height: 2560,
     scale: 0.8,
     zIndex: -1,
-    spacing: 60.0,
+    spacing: 100.0,
     stroke: "#444",
     lineWidth: 1.0,
     opacity: 0.0,
@@ -91,7 +91,7 @@ export default makeScene2D(function* (view) {
       centerPoint.scale(1.0, 0.6, easeInOutCubic),
     ),
     all(
-      centerPointTxt.text("center of world", 0.6),
+      centerPointTxt.text("world origin", 0.6),
     )
   );
 
@@ -104,11 +104,11 @@ export default makeScene2D(function* (view) {
     txtScale: 0.1,
   }
 
-  const square: ContentRect = createContentRect("", 300.0, squareConfig, 0.0, grid);
+  const square: ContentRect = createContentRect("", 0.0, squareConfig, 0.0, grid);
   yield* scaleContentRect(square, 0.8, 0.0);
 
-  square.txt.text(() => `world:\n[${square.rect.position.x().toFixed()}, ${square.rect.position.y().toFixed()}]`);
-  square.txt.position(new Vector2(-10.0, 60.0));
+  square.txt.text(() => `world:\n[${square.rect.position.x().toFixed()}, ${(-square.rect.position.y()).toFixed()}]`);
+  square.txt.position.y(60.0);
 
   yield* beginSlide("Show square");
 
@@ -119,9 +119,13 @@ export default makeScene2D(function* (view) {
 
   yield* beginSlide("Move square around");
 
-  var squareOriginPos: Vector2 = square.rect.position();
+  var squareOriginPos: Vector2;
 
   yield* chain(
+    moveContentRect(square, new Vector2(300.0, 300.0), 1.0, easeInOutCubic),
+    () => {squareOriginPos = square.rect.position()},
+
+    waitFor(0.4),
     tween(
       2.0, value => {
         value = easeInOutCubic(value);
@@ -130,10 +134,10 @@ export default makeScene2D(function* (view) {
     ),
 
     waitFor(0.4),
-    moveContentRect(square, new Vector2(-200.0, 100.0), 1.0, easeInOutCubic),
+    moveContentRect(square, new Vector2(-200.0, 100.0), 1.2, easeInOutCubic),
 
     waitFor(0.4),
-    moveContentRect(square, new Vector2(-400.0, 400.0), 1.5, easeInOutCubic),
+    moveContentRect(square, new Vector2(-400.0, 340.0), 1.5, easeInOutCubic),
   );
 
   const squareCenterPoint: Circle = new Circle({
