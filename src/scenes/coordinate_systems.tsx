@@ -95,6 +95,10 @@ export default makeScene2D(function* (view) {
     )
   );
 
+  yield* beginSlide("Move world around");
+
+  yield* grid.position(new Vector2(300.0, 100.0), 0.6, easeInOutCubic).to(0.0, 0.6, easeInOutCubic);
+
   const squareConfig: ContentRectConfig = {
     size: Vector2.one.scale(200.0),
     gap: 0.0,
@@ -149,10 +153,49 @@ export default makeScene2D(function* (view) {
 
   square.rect.add(squareCenterPoint);
 
+  yield* beginSlide("Move world around again");
+
+  yield* grid.position(new Vector2(100.0, -200.0), 0.6, easeInOutCubic).to(0.0, 0.6, easeInOutCubic);
+
   yield* beginSlide("Show square center point");
 
   yield* all(
     squareCenterPoint.opacity(1.0, 0.6, easeInOutCubic),
     squareCenterPoint.scale(1.0, 0.6, easeInOutCubic),
   );
+
+  const squarePoints: Circle[] = new Array<Circle>(4);
+  var pointIdx: number = 0;
+
+  for (var x = 0 ; x < 2; x++) {
+    for (var y = 0; y < 2; y++) {
+      const squarePoint: Circle = new Circle({
+        position: new Vector2(
+          -square.rect.size.x() * 0.5 + square.rect.size.x() * x,
+          -square.rect.size.y() * 0.5 + square.rect.size.y() * y
+        ),
+        scale: 0.4,
+        size: 40.0,
+        fill: COLOR.YELLOW,
+        opacity: 0.0,
+      });
+
+      squarePoints[pointIdx++] = squarePoint;
+      square.rect.add(squarePoint);
+    }
+  }
+
+  yield* beginSlide("Show square points");
+
+  yield* sequence(
+    0.1,
+    ...squarePoints.map(point =>
+      all(
+        point.opacity(1.0, 0.4, easeInOutCubic),
+        point.scale(1.0, 0.4, easeInOutCubic),
+      )
+    ),
+  );
+
+  yield* beginSlide("Show local position");
 });
