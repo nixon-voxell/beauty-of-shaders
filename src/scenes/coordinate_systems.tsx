@@ -98,6 +98,7 @@ export default makeScene2D(function* (view) {
   yield* beginSlide("Move world around");
 
   yield* grid.position(new Vector2(300.0, 100.0), 0.6, easeInOutCubic).to(0.0, 0.6, easeInOutCubic);
+  yield* grid.rotation(-20.0, 0.6, easeInOutCubic).to(0.0, 0.6, easeInOutCubic);
 
   const squareConfig: ContentRectConfig = {
     size: Vector2.one.scale(200.0),
@@ -155,7 +156,10 @@ export default makeScene2D(function* (view) {
 
   yield* beginSlide("Move world around again");
 
-  yield* grid.position(new Vector2(100.0, -200.0), 0.6, easeInOutCubic).to(0.0, 0.6, easeInOutCubic);
+  yield* all(
+    grid.position(new Vector2(100.0, -200.0), 0.6, easeInOutCubic).to(0.0, 0.6, easeInOutCubic),
+    grid.rotation(20.0, 0.6, easeInOutCubic).to(0.0, 0.6, easeInOutCubic),
+  );
 
   yield* beginSlide("Show square center point");
 
@@ -165,6 +169,7 @@ export default makeScene2D(function* (view) {
   );
 
   const squarePoints: Circle[] = new Array<Circle>(4);
+  const squarePointTxts: Txt[] = new Array<Txt>(4);
   var pointIdx: number = 0;
 
   for (var x = 0 ; x < 2; x++) {
@@ -180,10 +185,25 @@ export default makeScene2D(function* (view) {
         opacity: 0.0,
       });
 
-      squarePoints[pointIdx++] = squarePoint;
+      const squarePointTxt: Txt = new Txt({
+        scale: 0.1,
+        y: 40.0,
+        fill: COLOR.YELLOW,
+        shadowColor: COLOR.BLACK,
+        shadowBlur: 6.0,
+        text: () => `[${squarePoint.position.x()}, ${squarePoint.position.y()}]`,
+      });
+
+      squarePoints[pointIdx] = squarePoint;
+      squarePointTxts[pointIdx] = squarePointTxt;
+      squarePoint.add(squarePointTxt);
       square.rect.add(squarePoint);
+
+      pointIdx += 1;
     }
   }
+
+  // yield* beginSlide("Show world position arrow");
 
   yield* beginSlide("Show square points");
 
