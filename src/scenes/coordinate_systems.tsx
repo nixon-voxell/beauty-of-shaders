@@ -5,7 +5,7 @@ import {
 } from "../utils/rect_util";
 
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
-import { Circle, Grid, Line, Txt, Rect } from "@motion-canvas/2d/lib/components";
+import { Circle, Grid, Line, Txt } from "@motion-canvas/2d/lib/components";
 import { beginSlide } from "@motion-canvas/core/lib/utils";
 import { all, chain, delay, sequence, waitFor } from "@motion-canvas/core/lib/flow";
 import { easeInOutCubic, easeInOutQuart, tween} from "@motion-canvas/core/lib/tweening";
@@ -266,5 +266,104 @@ export default makeScene2D(function* (view) {
         arrow.arrowSize(16.0, 0.4, easeInOutCubic),
       )
     ),
+  );
+
+  yield* beginSlide("Move square around");
+
+  yield* sequence(
+    0.1,
+    ...squarePointArrows.map(arrow =>
+      all(
+        arrow.arrowSize(0.0, 0.4, easeInOutCubic),
+        arrow.end(0.0, 0.4, easeInOutCubic),
+      )
+    ),
+  );
+
+  yield* moveContentRect(square, Vector2.down.scale(300.0), 0.6, easeInOutCubic);
+
+  const localSpaceToSquareTxt: Txt = new Txt({
+    position: squarePoints[2].position().add(new Vector2(220.0, 60.0)),
+    scale: 0.12,
+    fill: COLOR.RED,
+  });
+
+  const localSpaceToWorldTxt: Txt = new Txt({
+    y: -200.0,
+    scale: 0.12,
+    fill: COLOR.BLUE,
+  });
+
+  square.rect.add(localSpaceToSquareTxt);
+  square.rect.add(localSpaceToWorldTxt);
+
+  yield* beginSlide("Local space to square txt");
+
+  yield* localSpaceToSquareTxt.text("(local space to square)", 0.6);
+
+  yield* beginSlide("Local space to world txt");
+
+  yield* localSpaceToWorldTxt.text("(local space to world)", 0.6);
+
+  yield* beginSlide("Equals world space");
+
+  yield* localSpaceToWorldTxt.text("(local space to world = world space)", 0.6);
+
+  const squarePointWorldSpaceTxt: Txt = squarePointTxts[2].clone();
+  squarePointWorldSpaceTxt.position(squarePointTxts[2].position());
+  squarePointWorldSpaceTxt.opacity(0.0);
+
+  squarePoints[2].add(squarePointWorldSpaceTxt);
+
+  yield* beginSlide("Copy local space coordinate")
+
+  // hide space txts
+  yield* all(
+    localSpaceToSquareTxt.opacity(0.0, 0.6, easeInOutCubic),
+    localSpaceToSquareTxt.scale(0.1, 0.6, easeInOutCubic),
+    localSpaceToWorldTxt.opacity(0.0, 0.6, easeInOutCubic),
+    localSpaceToWorldTxt.scale(0.1, 0.6, easeInOutCubic),
+  );
+
+  yield* all(
+    squarePointWorldSpaceTxt.position(squarePointWorldSpaceTxt.position().addY(-80.0), 0.6, easeInOutCubic),
+    squarePointWorldSpaceTxt.opacity(1.0, 0.6, easeInOutCubic),
+  )
+
+  yield* squarePointWorldSpaceTxt.text("mul(localToWorld, localPosition)", 0.6);
+
+  yield* beginSlide("Fill in local position");
+
+  yield* squarePointWorldSpaceTxt.text("mul(localToWorld, [100, 100])", 0.6);
+
+  yield* beginSlide("Show square point world position");
+
+  yield* all(
+    squarePointWorldSpaceTxt.text(() => {
+      const worldPos: Vector2 = squarePoints[2].absolutePosition();
+      return `[${(worldPos.x - 960).toFixed()}, ${(540 - worldPos.y).toFixed()}]`;
+    }, 0.6),
+    squarePointWorldSpaceTxt.fill(COLOR.BLUE, 0.6),
+  );
+
+  yield* beginSlide("Vectors to square point");
+
+  yield* sequence(
+    0.1,
+    squareCenterArrow.end(1.0, 0.6, easeInOutCubic),
+    squareCenterArrow.arrowSize(20.0, 0.6, easeInOutCubic),
+  );
+
+  yield* sequence(
+    0.1,
+    squarePointArrows[2].end(1.0, 0.4, easeInOutCubic),
+    squarePointArrows[2].arrowSize(20.0, 0.4, easeInOutCubic),
+  );
+
+  yield* beginSlide("Rotate and scale square");
+
+  yield* chain(
+    square.rect.rotation(-10.0, 0.6, easeInOutCubic),
+    square.rect.scale(1.1, 0.6, easeInOutCubic),
   );
 });
