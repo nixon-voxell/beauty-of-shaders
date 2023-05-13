@@ -138,6 +138,40 @@ function createMulContentRects(
   return contents;
 }
 
+function createMulEmptyContentRects(
+  count: number,
+  config: ContentRectConfig, opacity: number,
+  parent: Layout, direction: Vector2 = Vector2.up,
+): MultiContentRect {
+  const contents: MultiContentRect = {
+    rects: new Array<Rect>(count),
+    txts: new Array<Txt>(count),
+  };
+
+  for (var c = 0; c < count; c++) {
+    const rect: Rect = new Rect({
+      position: direction.mul(config.size).add(direction.mul(config.gap)).mul(c),
+      size: config.size,
+      radius: config.radius,
+      fill: config.fill,
+      opacity: opacity,
+    });
+
+    const txt: Txt = new Txt({
+      scale: config.txtScale,
+      fill: config.txtFill,
+    });
+
+    contents.rects[c] = rect;
+    contents.txts[c] = txt;
+
+    rect.add(txt);
+    parent.add(rect);
+  }
+
+  return contents;
+}
+
 function* moveMulContentRects(
   content: MultiContentRect, movement: Vector2,
   duration: number, seqDelay: number, timingFunc?: TimingFunction
@@ -227,7 +261,7 @@ function* focusIdxMulContentRects(
 
 export {
   ContentRectConfig, MultiContentRect,
-  createMulContentRects,
+  createMulContentRects, createMulEmptyContentRects,
   moveMulContentRects, fadeMulContentRects, scaleMulContentRects,
   sameTxtMulContentRects, changeTxtMulContentRects,
   focusIdxMulContentRects,

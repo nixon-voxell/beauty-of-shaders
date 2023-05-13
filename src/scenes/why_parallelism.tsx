@@ -4,7 +4,7 @@ import {
   ContentRectConfig, MultiContentRect,
   createMulContentRects,
   moveMulContentRects, fadeMulContentRects,
-  sameTxtMulContentRects, changeTxtMulContentRects, focusIdxMulContentRects, scaleMulContentRects,
+  focusIdxMulContentRects, scaleMulContentRects,
   ContentRect, createContentRect, scaleContentRect, fadeContentRect
 } from "../utils/rect_util";
 import { animateDistanceLine, createDistanceLine } from "../utils/arrow_util";
