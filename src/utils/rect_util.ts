@@ -19,7 +19,7 @@ type ContentRect = {
 }
 
 function createContentRect(
-  cont: string, position: SignalValue<PossibleVector2<number>>,
+  cont: SignalValue<string>, position: SignalValue<PossibleVector2<number>>,
   config: ContentRectConfig, opacity: number,
   parent: Layout
 ): ContentRect {
@@ -45,11 +45,19 @@ function createContentRect(
 }
 
 function* moveContentRect(
-  content: ContentRect, movement: Vector2,
+  content: ContentRect, movement: PossibleVector2<number>,
   duration: number, timingFunc?: TimingFunction
 ) {
   const rect: Rect = content.rect;
   yield* rect.position(rect.position().add(movement), duration, timingFunc);
+}
+
+function* positionContentRect(
+  content: ContentRect, position: PossibleVector2<number>,
+  duration: number, timingFunc?: TimingFunction
+) {
+  const rect: Rect = content.rect;
+  yield* rect.position(position, duration, timingFunc);
 }
 
 function* fadeContentRect(
@@ -68,7 +76,7 @@ function* scaleContentRect(
   yield* rect.scale(scale, duration, timingFunc);
 }
 
-function* changeTxtContentRect(
+function* changeContentTxt(
   content: ContentRect, cont: string,
   duration: number, timingFunc?: TimingFunction
 ) {
@@ -76,29 +84,38 @@ function* changeTxtContentRect(
   yield* txt.text(cont, duration, timingFunc);
 }
 
-export {
-  ContentRect, createContentRect,
-  moveContentRect, fadeContentRect, scaleContentRect, changeTxtContentRect,
+function* scaleContentTxt(
+  content: ContentRect, scale: number,
+  duration: number, timingFunc?: TimingFunction
+) {
+  const txt: Txt = content.txt;
+  yield* txt.scale(scale, duration, timingFunc);
 }
 
-type VertContentRect = {
+export {
+  ContentRect, createContentRect,
+  positionContentRect, moveContentRect, fadeContentRect, scaleContentRect,
+  changeContentTxt, scaleContentTxt,
+}
+
+type MultiContentRect = {
   rects: Rect[],
   txts: Txt[],
 }
 
-function createVertContentRects(
+function createMulContentRects(
   contTxts: string[],
   config: ContentRectConfig, opacity: number,
-  parent: Layout
-): VertContentRect {
-  const contents: VertContentRect = {
+  parent: Layout, direction: Vector2 = Vector2.up,
+): MultiContentRect {
+  const contents: MultiContentRect = {
     rects: new Array<Rect>(contTxts.length),
     txts: new Array<Txt>(contTxts.length),
   };
 
   for (var c = 0; c < contTxts.length; c++) {
     const rect: Rect = new Rect({
-      y: c * (config.size.y + config.gap),
+      position: direction.mul(config.size).add(direction.mul(config.gap)).mul(c),
       size: config.size,
       radius: config.radius,
       fill: config.fill,
@@ -121,8 +138,42 @@ function createVertContentRects(
   return contents;
 }
 
-function* moveVertContentRects(
-  content: VertContentRect, movement: Vector2,
+function createMulEmptyContentRects(
+  count: number,
+  config: ContentRectConfig, opacity: number,
+  parent: Layout, direction: Vector2 = Vector2.up,
+): MultiContentRect {
+  const contents: MultiContentRect = {
+    rects: new Array<Rect>(count),
+    txts: new Array<Txt>(count),
+  };
+
+  for (var c = 0; c < count; c++) {
+    const rect: Rect = new Rect({
+      position: direction.mul(config.size).add(direction.mul(config.gap)).mul(c),
+      size: config.size,
+      radius: config.radius,
+      fill: config.fill,
+      opacity: opacity,
+    });
+
+    const txt: Txt = new Txt({
+      scale: config.txtScale,
+      fill: config.txtFill,
+    });
+
+    contents.rects[c] = rect;
+    contents.txts[c] = txt;
+
+    rect.add(txt);
+    parent.add(rect);
+  }
+
+  return contents;
+}
+
+function* moveMulContentRects(
+  content: MultiContentRect, movement: Vector2,
   duration: number, seqDelay: number, timingFunc?: TimingFunction
 ) {
   yield* sequence(
@@ -133,8 +184,8 @@ function* moveVertContentRects(
   );
 }
 
-function* fadeVertContentRects(
-  content: VertContentRect, opacity: number,
+function* fadeMulContentRects(
+  content: MultiContentRect, opacity: number,
   duration: number, seqDelay: number, timingFunc?: TimingFunction
 ) {
   yield* sequence(
@@ -145,8 +196,8 @@ function* fadeVertContentRects(
   );
 }
 
-function* scaleVertContentRects(
-  content: VertContentRect, scale: number,
+function* scaleMulContentRects(
+  content: MultiContentRect, scale: number,
   duration: number, seqDelay: number, timingFunc?: TimingFunction
 ) {
   yield* sequence(
@@ -157,8 +208,8 @@ function* scaleVertContentRects(
   );
 }
 
-function* sameTxtVertContentRects(
-  content: VertContentRect, text: string,
+function* sameTxtMulContentRects(
+  content: MultiContentRect, text: string,
   duration: number, seqDelay: number, timingFunc?: TimingFunction
 ) {
   yield* sequence(
@@ -169,8 +220,8 @@ function* sameTxtVertContentRects(
   );
 }
 
-function* changeTxtVertContentRects(
-  content: VertContentRect, contTxts: string[],
+function* changeTxtMulContentRects(
+  content: MultiContentRect, contTxts: string[],
   duration: number, seqDelay: number, timingFunc?: TimingFunction
 ) {
   yield* sequence(
@@ -181,8 +232,8 @@ function* changeTxtVertContentRects(
   );
 }
 
-function* focusIdxVertContentRects(
-  content: VertContentRect, index: number, scaleUp: number,
+function* focusIdxMulContentRects(
+  content: MultiContentRect, index: number, scaleUp: number,
   fadeOpacity: number, scaleDown: number,
   duration: number, seqDelay: number, timingFunc?: TimingFunction
 ) {
@@ -209,9 +260,9 @@ function* focusIdxVertContentRects(
 }
 
 export {
-  ContentRectConfig, VertContentRect,
-  createVertContentRects,
-  moveVertContentRects, fadeVertContentRects, scaleVertContentRects,
-  sameTxtVertContentRects, changeTxtVertContentRects,
-  focusIdxVertContentRects,
+  ContentRectConfig, MultiContentRect,
+  createMulContentRects, createMulEmptyContentRects,
+  moveMulContentRects, fadeMulContentRects, scaleMulContentRects,
+  sameTxtMulContentRects, changeTxtMulContentRects,
+  focusIdxMulContentRects,
 }

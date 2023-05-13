@@ -1,10 +1,11 @@
 import { COLOR } from "../styles"
 import { outlineRects, outlineLayout, setup, focusOnOutlineIndex, outlineTitle } from "../utils/outline_util";
 import {
-  ContentRectConfig, VertContentRect,
-  createVertContentRects,
-  moveVertContentRects, fadeVertContentRects,
-  sameTxtVertContentRects, changeTxtVertContentRects, focusIdxVertContentRects, scaleVertContentRects, ContentRect, createContentRect, scaleContentRect, fadeContentRect
+  ContentRectConfig, MultiContentRect,
+  createMulContentRects,
+  moveMulContentRects, fadeMulContentRects,
+  focusIdxMulContentRects, scaleMulContentRects,
+  ContentRect, createContentRect, scaleContentRect, fadeContentRect
 } from "../utils/rect_util";
 import { animateDistanceLine, createDistanceLine } from "../utils/arrow_util";
 import { animSquareGrid, createSquareGrid, SquareGridConfig } from "../utils/grid_util";
@@ -54,9 +55,9 @@ export default makeScene2D(function* (view) {
 
   const topics = [
     "0. Why do we need parallelism?",
-    "1. Graphics pipeline",
-    "2. Coordinate systems",
-    "3. Basic mesh concepts",
+    "1. Coordinate systems",
+    "2. Basic mesh concepts",
+    "3. Graphics pipeline",
     "4. Vertex & fragment shaders"
   ];
 
@@ -73,51 +74,42 @@ export default makeScene2D(function* (view) {
     position: new Vector2(400.0, -400.0),
   });
 
-  const topicRects: VertContentRect = createVertContentRects(
+  const topicRects: MultiContentRect = createMulContentRects(
     topics, topicConfig, 1.0, topicLayout
   );
 
   view.add(topicLayout);
 
-  yield* fadeVertContentRects(
+  yield* fadeMulContentRects(
     topicRects, 0.0,
     0.0, 0.0
   );
 
-  yield* scaleVertContentRects(
+  yield* scaleMulContentRects(
     topicRects, 0.8,
-    0.0, 0.0
-  );
-
-  yield* sameTxtVertContentRects(
-    topicRects, "",
     0.0, 0.0
   );
 
   yield* beginSlide("Show subtopics");
 
   yield* all(
-    moveVertContentRects(
+    moveMulContentRects(
       topicRects, new Vector2(0.0, 100.0),
-      0.6, 0.15, easeInOutCubic
+      0.6, 0.3, easeInOutCubic
     ),
-    fadeVertContentRects(
+    fadeMulContentRects(
       topicRects, 1.0,
-      0.6, 0.15, easeInOutCubic
+      0.6, 0.3, easeInOutCubic
     ),
-    scaleVertContentRects(
+    scaleMulContentRects(
       topicRects, 1.0,
-      0.6, 0.15
-    ),
-    changeTxtVertContentRects(
-      topicRects, topics,
-      0.6, 0.15, easeInOutCubic
+      0.6, 0.3, easeInOutCubic
     ),
   );
 
   yield* beginSlide("Focus on '#0'");
 
-  yield* focusIdxVertContentRects(
+  yield* focusIdxMulContentRects(
     topicRects, 0, 1.4,
     0.4, 1.0,
     0.6, 0.0, easeInOutCubic
@@ -143,7 +135,7 @@ export default makeScene2D(function* (view) {
     outlineTitle.opacity(0.0, 0.6, easeInOutCubic),
 
     // fade out contents
-    focusIdxVertContentRects(
+    focusIdxMulContentRects(
       topicRects, 0, 1.4,
       0.0, 0.8,
       0.6, 0.1, easeInOutCubic
@@ -203,7 +195,7 @@ export default makeScene2D(function* (view) {
     radiusTxt.text(() => radius().toFixed(2).toString(), 0.6, easeInOutCubic),
   )
 
-  yield* beginSlide("Scale circle up/down");
+  // yield* beginSlide("Scale circle up/down");
 
   yield* radius(9.0, 1.0, easeInOutCubic).to(4.5, 1.0, easeInOutCubic);
 
@@ -433,6 +425,8 @@ export default makeScene2D(function* (view) {
     greaterThanRadiusTxt.opacity(1.0, 0.4, easeInOutCubic),
   );
 
+  yield* beginSlide("Repeat the same process for each pixel");
+
   // cleanup
   yield* all(
     animateDistanceLine(measureLine, 0.6, easeInOutCubic, 0.5, 0.5, 0.0, 0.1, 0.0),
@@ -479,8 +473,6 @@ export default makeScene2D(function* (view) {
 
   pixelsHeightTxtClone.opacity(0.0);
   pixelsWidthTxtClone.opacity(0.0);
-
-  yield* beginSlide("Repeat the same process for each pixel");
 
   yield* animateDistanceLine(measureLine, 0.6, easeInOutCubic, 0.0, 1.0, 20.0, 0.0, 0.0);
   yield* scaleContentRect(verbalCont, 0.8, 0.0, easeInOutCubic);
