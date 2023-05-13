@@ -133,6 +133,8 @@ export default makeScene2D(function* (view) {
     scale: 0.8,
     size: 40.0,
     fill: COLOR.RED,
+    shadowColor: COLOR.BLACK,
+    shadowBlur: 10.0,
     opacity: 0.0,
   });
   const squareCenterArrow: Line = new Line({
@@ -180,6 +182,8 @@ export default makeScene2D(function* (view) {
         scale: 0.4,
         size: 40.0,
         fill: COLOR.YELLOW,
+        shadowColor: COLOR.BLACK,
+        shadowBlur: 10.0,
         opacity: 0.0,
       });
 
@@ -342,14 +346,14 @@ export default makeScene2D(function* (view) {
   // rotate and scale command texts
   const rotateTxt: Txt = new Txt({
     position: new Vector2(600.0, 380.0),
-    scale: 0.1,
+    scale: 0.18,
     fill: COLOR.WHITE_SHADOW,
     text: "rotate -30",
     opacity: 0.0,
   });
   const scaleTxt: Txt = new Txt({
     position: new Vector2(600.0, 380.0),
-    scale: 0.1,
+    scale: 0.18,
     fill: COLOR.WHITE_SHADOW,
     text: "scale 1.2",
     opacity: 0.0,
@@ -364,30 +368,34 @@ export default makeScene2D(function* (view) {
     square.rect.opacity(0.8, 0.4, easeInOutCubic),
     square.rect.rotation(-30.0, 0.6, easeInOutCubic),
     rotateTxt.opacity(1.0, 0.6, easeInOutCubic),
+    rotateTxt.scale(0.2, 0.6, easeInOutCubic),
   );
 
   yield* beginSlide("Scale square");
 
   yield* all(
     square.rect.scale(1.2, 0.6, easeInOutCubic),
-    rotateTxt.position.y(rotateTxt.position.y() - 40.0, 0.6, easeInOutCubic),
+    rotateTxt.position.y(rotateTxt.position.y() - 80.0, 0.6, easeInOutCubic),
     scaleTxt.opacity(1.0, 0.6, easeInOutCubic),
+    scaleTxt.scale(0.2, 0.6, easeInOutCubic),
   );
 
   yield* beginSlide("Move world around #2");
 
   squarePointWorldSpaceTxt.text(squarePointWorldSpaceTxt.text());
 
-  yield* all(
+  yield* chain(
     sequence(
       0.1,
       rotateTxt.opacity(0.0, 0.4, easeInOutCubic),
-      rotateTxt.scale(0.08, 0.4, easeInOutCubic),
+      rotateTxt.scale(0.1, 0.4, easeInOutCubic),
       scaleTxt.opacity(0.0, 0.4, easeInOutCubic),
-      scaleTxt.scale(0.08, 0.4, easeInOutCubic),
+      scaleTxt.scale(0.1, 0.4, easeInOutCubic),
     ),
-    grid.position(new Vector2(100.0, 200.0), 0.6, easeInOutCubic).to(0.0, 0.6, easeInOutCubic),
-    grid.rotation(20.0, 0.6, easeInOutCubic).to(0.0, 0.6, easeInOutCubic),
+    all(
+      grid.position(new Vector2(100.0, 200.0), 0.6, easeInOutCubic).to(0.0, 0.6, easeInOutCubic),
+      grid.rotation(20.0, 0.6, easeInOutCubic).to(0.0, 0.6, easeInOutCubic),
+    ),
   );
 
   yield* beginSlide("Fade out grid");
