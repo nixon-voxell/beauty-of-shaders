@@ -1,7 +1,7 @@
 import { COLOR } from "../styles"
 import {
   ContentRectConfig, ContentRect, createContentRect,
-  scaleContentRect, fadeContentRect, positionContentRect, changeContentTxt, moveContentRect
+  scaleContentRect, fadeContentRect, positionContentRect, changeContentTxt
 } from "../utils/rect_util";
 
 import { all, delay } from "@motion-canvas/core/lib/flow";
