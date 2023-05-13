@@ -19,7 +19,7 @@ export default makeScene2D(function* (view) {
 
   yield* beginSlide("Change title");
 
-  yield* changeTitleAtCenter(titleCont, "1. Coordinate Systems");
+  yield* changeTitleAtCenter(titleCont, "1. Coordinate systems");
 
   yield* beginSlide("Move title to top left");
 
