@@ -2,6 +2,7 @@ export const COLOR = {
   INDIGO: "#000067",
   YELLOW: "#FFC66D",
   RED: "#FF6470",
+  RED_SHADOW: "rgba(249, 107, 116, 0.6)",
   GREEN: "#99C47A",
   GREEN_SHADOW: "rgba(153, 196, 122, 0.6)",
   BLUE: "#68ABDF",
