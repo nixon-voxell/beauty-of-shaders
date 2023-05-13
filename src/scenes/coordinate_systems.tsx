@@ -1,8 +1,9 @@
 import { COLOR } from "../styles"
 import {
-  ContentRectConfig,
-  ContentRect, createContentRect, scaleContentRect, fadeContentRect, positionContentRect, changeContentTxt, moveContentRect
+  ContentRectConfig, ContentRect, createContentRect,
+  scaleContentRect, fadeContentRect, positionContentRect, changeContentTxt, moveContentRect
 } from "../utils/rect_util";
+import { createTitleCont, changeTitleAtCenter, moveTitleToTopLeft } from "../utils/subtopic_util";
 
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
 import { Circle, Grid, Line, Rect, Txt } from "@motion-canvas/2d/lib/components";
@@ -14,39 +15,15 @@ import { Vector2 } from "@motion-canvas/core/lib/types";
 export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);
 
-  const titleConfig: ContentRectConfig = {
-    size: new Vector2(420.0, 98.0),
-    radius: 10.0,
-    gap: 10.0,
-    fill: COLOR.WHITE,
-    txtScale: 0.09,
-    txtFill: COLOR.BLACK,
-  }
-  const titleCont: ContentRect = createContentRect(
-    "0. Why do we need parallelism?",
-    new Vector2(-700.0, -440.0), titleConfig, 0.6, view
-  );
+  const titleCont: ContentRect = createTitleCont("0. Why do we need parallelism?", view);
 
-  yield* beginSlide("Move title to center");
+  yield* beginSlide("Change title");
 
-  yield* all(
-    positionContentRect(titleCont, 0.0, 0.6, easeInOutCubic),
-    fadeContentRect(titleCont, 1.0, 0.6, easeInOutCubic),
-  );
-
-  yield* scaleContentRect(titleCont, 1.4, 0.6, easeInOutCubic);
-  yield* delay(
-    0.3,
-    changeContentTxt(titleCont, "1. Coordinate Systems", 0.6),
-  );
+  yield* changeTitleAtCenter(titleCont, "1. Coordinate Systems");
 
   yield* beginSlide("Move title to top left");
 
-  yield* all(
-    positionContentRect(titleCont, new Vector2(-700.0, -440.0), 0.6, easeInOutCubic),
-    titleCont.rect.fill("#8A8C8E", 0.6, easeInOutCubic),
-    scaleContentRect(titleCont, 1.0, 0.6, easeInOutCubic),
-  );
+  yield* moveTitleToTopLeft(titleCont);
 
   const grid: Grid = new Grid({
     width: 2560,
