@@ -5,7 +5,7 @@ import {
 } from "../utils/rect_util";
 
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
-import { Circle, Grid, Line, Txt } from "@motion-canvas/2d/lib/components";
+import { Circle, Grid, Line, Rect, Txt } from "@motion-canvas/2d/lib/components";
 import { beginSlide } from "@motion-canvas/core/lib/utils";
 import { all, chain, delay, sequence, waitFor } from "@motion-canvas/core/lib/flow";
 import { easeInOutCubic, easeInOutQuart, tween} from "@motion-canvas/core/lib/tweening";
@@ -19,7 +19,7 @@ export default makeScene2D(function* (view) {
     radius: 10.0,
     gap: 10.0,
     fill: COLOR.WHITE,
-    txtScale:0.09,
+    txtScale: 0.09,
     txtFill: COLOR.BLACK,
   }
   const titleCont: ContentRect = createContentRect(
@@ -95,7 +95,7 @@ export default makeScene2D(function* (view) {
     )
   );
 
-  yield* beginSlide("Move world around");
+  yield* beginSlide("Move world around #0");
 
   yield* grid.position(new Vector2(300.0, 100.0), 0.6, easeInOutCubic).to(0.0, 0.6, easeInOutCubic);
   yield* grid.rotation(-20.0, 0.6, easeInOutCubic).to(0.0, 0.6, easeInOutCubic);
@@ -145,7 +145,7 @@ export default makeScene2D(function* (view) {
     moveContentRect(square, new Vector2(-400.0, 340.0), 1.5, easeInOutCubic),
   );
 
-  yield* beginSlide("Move world around again");
+  yield* beginSlide("Move world around #1");
 
   yield* all(
     grid.position(new Vector2(100.0, -200.0), 0.6, easeInOutCubic).to(0.0, 0.6, easeInOutCubic),
@@ -161,7 +161,7 @@ export default makeScene2D(function* (view) {
   const squareCenterArrow: Line = new Line({
     lineWidth: 10.0,
     points: [
-      0.0,
+      () => centerPoint.position(),
       () => square.rect.position(),
     ],
     stroke: COLOR.BLUE,
@@ -169,12 +169,10 @@ export default makeScene2D(function* (view) {
     endArrow: true,
     start: 0.0,
     end: 0.0,
-    // shadowColor: COLOR.BLACK,
-    // shadowBlur: 10.0,
   });
 
   square.rect.add(squareCenterPoint);
-  view.add(squareCenterArrow);
+  grid.add(squareCenterArrow);
 
   yield* beginSlide("Show square center point");
 
@@ -212,8 +210,6 @@ export default makeScene2D(function* (view) {
         scale: 0.1,
         x: squarePoint.position().sub(0.0).normalized.scale(180.0).x,
         fill: COLOR.RED,
-        shadowColor: COLOR.BLACK,
-        shadowBlur: 6.0,
         text: () => `[${squarePoint.position.x()}, ${-squarePoint.position.y()}]`,
       });
 
@@ -227,8 +223,6 @@ export default makeScene2D(function* (view) {
         endArrow: true,
         arrowSize: 0.0,
         end: 0.0,
-        // shadowColor: COLOR.BLACK,
-        // shadowBlur: 10.0,
       });
 
       squarePoints[pointIdx] = squarePoint;
@@ -268,7 +262,7 @@ export default makeScene2D(function* (view) {
     ),
   );
 
-  yield* beginSlide("Move square around");
+  yield* beginSlide("Move square up right");
 
   yield* sequence(
     0.1,
@@ -280,7 +274,7 @@ export default makeScene2D(function* (view) {
     ),
   );
 
-  yield* moveContentRect(square, Vector2.down.scale(300.0), 0.6, easeInOutCubic);
+  yield* moveContentRect(square, new Vector2(100.0, -300.0), 0.6, easeInOutCubic);
 
   const localSpaceToSquareTxt: Txt = new Txt({
     position: squarePoints[2].position().add(new Vector2(220.0, 60.0)),
@@ -299,15 +293,15 @@ export default makeScene2D(function* (view) {
 
   yield* beginSlide("Local space to square txt");
 
-  yield* localSpaceToSquareTxt.text("(local space to square)", 0.6);
+  yield* localSpaceToSquareTxt.text("(local space wrt square)", 0.6);
 
   yield* beginSlide("Local space to world txt");
 
-  yield* localSpaceToWorldTxt.text("(local space to world)", 0.6);
+  yield* localSpaceToWorldTxt.text("(local space wrt world)", 0.6);
 
   yield* beginSlide("Equals world space");
 
-  yield* localSpaceToWorldTxt.text("(local space to world = world space)", 0.6);
+  yield* localSpaceToWorldTxt.text("(local space wrt world = world space)", 0.6);
 
   const squarePointWorldSpaceTxt: Txt = squarePointTxts[2].clone();
   squarePointWorldSpaceTxt.position(squarePointTxts[2].position());
@@ -330,18 +324,18 @@ export default makeScene2D(function* (view) {
     squarePointWorldSpaceTxt.opacity(1.0, 0.6, easeInOutCubic),
   )
 
-  yield* squarePointWorldSpaceTxt.text("mul(localToWorld, localPosition)", 0.6);
+  yield* squarePointWorldSpaceTxt.text("mul(localToWorldMatrix, localPosition)", 0.6);
 
   yield* beginSlide("Fill in local position");
 
-  yield* squarePointWorldSpaceTxt.text("mul(localToWorld, [100, 100])", 0.6);
+  yield* squarePointWorldSpaceTxt.text("mul(localToWorldMatrix, [100, 100])", 0.6);
 
   yield* beginSlide("Show square point world position");
 
   yield* all(
     squarePointWorldSpaceTxt.text(() => {
-      const worldPos: Vector2 = squarePoints[2].absolutePosition();
-      return `[${(worldPos.x - 960).toFixed()}, ${(540 - worldPos.y).toFixed()}]`;
+      const worldPos: Vector2 = squarePoints[2].absolutePosition().sub(centerPoint.absolutePosition());
+      return `[${worldPos.x.toFixed()}, ${-worldPos.y.toFixed()}]`;
     }, 0.6),
     squarePointWorldSpaceTxt.fill(COLOR.BLUE, 0.6),
   );
@@ -360,10 +354,69 @@ export default makeScene2D(function* (view) {
     squarePointArrows[2].arrowSize(20.0, 0.4, easeInOutCubic),
   );
 
+  const originSquareRect: Rect = square.rect.clone();
+  originSquareRect.position(square.rect.position());
+  originSquareRect.removeChildren();
+  originSquareRect.opacity(0.4);
+  originSquareRect.zIndex(-1);
+
+  grid.add(originSquareRect);
+
+  // rotate and scale command texts
+  const rotateTxt: Txt = new Txt({
+    position: new Vector2(600.0, 380.0),
+    scale: 0.1,
+    fill: COLOR.WHITE_SHADOW,
+    text: "rotate -30",
+    opacity: 0.0,
+  });
+  const scaleTxt: Txt = new Txt({
+    position: new Vector2(600.0, 380.0),
+    scale: 0.1,
+    fill: COLOR.WHITE_SHADOW,
+    text: "scale 1.2",
+    opacity: 0.0,
+  });
+
+  view.add(rotateTxt);
+  view.add(scaleTxt);
+
   yield* beginSlide("Rotate and scale square");
 
   yield* chain(
-    square.rect.rotation(-10.0, 0.6, easeInOutCubic),
-    square.rect.scale(1.1, 0.6, easeInOutCubic),
+    all(
+      square.rect.opacity(0.8, 0.4, easeInOutCubic),
+      square.rect.rotation(-30.0, 0.6, easeInOutCubic),
+      rotateTxt.opacity(1.0, 0.6, easeInOutCubic),
+    ),
+    waitFor(0.6),
+    all(
+      square.rect.scale(1.2, 0.6, easeInOutCubic),
+      rotateTxt.position.y(rotateTxt.position.y() - 40.0, 0.6, easeInOutCubic),
+      scaleTxt.opacity(1.0, 0.6, easeInOutCubic),
+    )
+  );
+
+  yield* beginSlide("Move world around #2");
+
+  squarePointWorldSpaceTxt.text(squarePointWorldSpaceTxt.text());
+
+  yield* all(
+    sequence(
+      0.1,
+      rotateTxt.opacity(0.0, 0.4, easeInOutCubic),
+      rotateTxt.scale(0.08, 0.4, easeInOutCubic),
+      scaleTxt.opacity(0.0, 0.4, easeInOutCubic),
+      scaleTxt.scale(0.08, 0.4, easeInOutCubic),
+    ),
+    grid.position(new Vector2(100.0, 200.0), 0.6, easeInOutCubic).to(0.0, 0.6, easeInOutCubic),
+    grid.rotation(20.0, 0.6, easeInOutCubic).to(0.0, 0.6, easeInOutCubic),
+  );
+
+  yield* beginSlide("Fade out grid");
+
+  yield* all(
+    grid.scale(0.8, 0.6, easeInOutCubic),
+    grid.opacity(0.0, 0.6, easeInOutCubic),
   );
 });
