@@ -143,6 +143,8 @@ export default makeScene2D(function* (view) {
     fill: COLOR.BLUE,
     position: points1[0],
     opacity: 0.0,
+    shadowColor: COLOR.BLACK,
+    shadowBlur: 10.0,
 
     children: [
       new Txt({
