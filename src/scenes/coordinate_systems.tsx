@@ -358,20 +358,20 @@ export default makeScene2D(function* (view) {
   view.add(rotateTxt);
   view.add(scaleTxt);
 
-  yield* beginSlide("Rotate and scale square");
+  yield* beginSlide("Rotate square");
 
-  yield* chain(
-    all(
-      square.rect.opacity(0.8, 0.4, easeInOutCubic),
-      square.rect.rotation(-30.0, 0.6, easeInOutCubic),
-      rotateTxt.opacity(1.0, 0.6, easeInOutCubic),
-    ),
-    waitFor(0.6),
-    all(
-      square.rect.scale(1.2, 0.6, easeInOutCubic),
-      rotateTxt.position.y(rotateTxt.position.y() - 40.0, 0.6, easeInOutCubic),
-      scaleTxt.opacity(1.0, 0.6, easeInOutCubic),
-    )
+  yield* all(
+    square.rect.opacity(0.8, 0.4, easeInOutCubic),
+    square.rect.rotation(-30.0, 0.6, easeInOutCubic),
+    rotateTxt.opacity(1.0, 0.6, easeInOutCubic),
+  );
+
+  yield* beginSlide("Scale square");
+
+  yield* all(
+    square.rect.scale(1.2, 0.6, easeInOutCubic),
+    rotateTxt.position.y(rotateTxt.position.y() - 40.0, 0.6, easeInOutCubic),
+    scaleTxt.opacity(1.0, 0.6, easeInOutCubic),
   );
 
   yield* beginSlide("Move world around #2");
