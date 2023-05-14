@@ -58,7 +58,7 @@ export default makeScene2D(function* (view) {
     "1. Coordinate systems",
     "2. Basic mesh concepts",
     "3. Graphics pipeline",
-    "4. Vertex & fragment shaders"
+    // "4. Vertex & fragment shaders"
   ];
 
   const topicConfig: ContentRectConfig = {
@@ -71,7 +71,7 @@ export default makeScene2D(function* (view) {
   }
 
   const topicLayout: Layout = new Layout({
-    position: new Vector2(400.0, -400.0),
+    position: new Vector2(400.0, -300.0),
   });
 
   const topicRects: MultiContentRect = createMulContentRects(
@@ -147,7 +147,7 @@ export default makeScene2D(function* (view) {
         // move 'Why do we need parallelism to top left'
         rect0.scale(1.0, 0.6, easeInOutCubic),
         rect0.size(rect0.size().mul(0.7), 0.6, easeInOutCubic),
-        rect0.position(new Vector2(-1100.0, -40.0), 0.6, easeInOutCubic),
+        rect0.position(new Vector2(-1100.0, -140.0), 0.6, easeInOutCubic),
         rect0.opacity(0.6, 0.6, easeInOutCubic),
 
         txt0.scale(0.09, 0.6, easeInOutCubic),

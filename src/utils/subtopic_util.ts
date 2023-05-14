@@ -47,4 +47,4 @@ function* moveTitleToTopLeft(titleCont: ContentRect) {
   );
 }
 
-export { createTitleCont, changeTitleAtCenter, moveTitleToTopLeft, }
+export { createTitleCont, changeTitleAtCenter, moveTitleToTopLeft, };

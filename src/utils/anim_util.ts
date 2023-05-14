@@ -17,4 +17,4 @@ function* rectScaleReview(
   );
 }
 
-export { rectScaleReview };
+export { rectScaleReview, };

@@ -1,9 +1,9 @@
 import { COLOR } from "../styles"
-import { ContentRect, ContentRectConfig, createMulContentRects, createMulEmptyContentRects, fadeMulContentRects, MultiContentRect, scaleMulContentRects } from "../utils/rect_util";
+import { ContentRect, ContentRectConfig, createMulContentRects, fadeMulContentRects, MultiContentRect, scaleMulContentRects } from "../utils/rect_util";
 import { createTitleCont, changeTitleAtCenter, moveTitleToTopLeft } from "../utils/subtopic_util";
 
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
-import { Circle, Layout, Line, Rect, Txt } from "@motion-canvas/2d/lib/components";
+import { Circle, Layout, Line, Txt } from "@motion-canvas/2d/lib/components";
 import { beginSlide } from "@motion-canvas/core/lib/utils";
 import { all, chain, sequence } from "@motion-canvas/core/lib/flow";
 import { easeInOutCubic } from "@motion-canvas/core/lib/tweening";
@@ -304,5 +304,5 @@ export default makeScene2D(function* (view) {
       idxArrayLayout.opacity(0.0, 0.6, easeInOutCubic),
       idxArrayLayout.scale(0.8, 0.6, easeInOutCubic),
     ),
-  )
+  );
 });
