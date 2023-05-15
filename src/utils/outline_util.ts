@@ -5,6 +5,12 @@ import { all } from "@motion-canvas/core/lib/flow";
 import { easeInOutCubic } from "@motion-canvas/core/lib/tweening";
 import { Vector2 } from "@motion-canvas/core/lib/types";
 
+type OutlineContent = {
+  outlineTitle: Txt,
+  outlineRects: Rect[],
+  outlineLayout: Layout,
+}
+
 function createOutlineRect(text: string) {
   return new Rect({
     width: "100%",
@@ -23,19 +29,15 @@ function createOutlineRect(text: string) {
   })
 }
 
-var outlineTitle: Txt;
-var outlineRects: Rect[];
-var outlineLayout: Layout;
-
-async function setup() {
-  outlineTitle = new Txt({
+function setup(): OutlineContent {
+  const outlineTitle = new Txt({
     scale: 0.3,
     position: new Vector2(-500.0, -400.0),
     fill: COLOR.WHITE,
     text: "Beauty of Shaders"
   });
 
-  outlineRects = new Array<Rect>(
+  const outlineRects = new Array<Rect>(
     createOutlineRect("What are shaders anyway?"),
     // #1: What is a Shader? (definition)
     // #2: Types of Shaders
@@ -62,7 +64,7 @@ async function setup() {
     // https://www.realtimerendering.com/raytracinggems/
   );
 
-  outlineLayout = new Layout({
+  const outlineLayout = new Layout({
     layout: true,
     direction: "row",
     padding: 100,
@@ -86,22 +88,30 @@ async function setup() {
   for (var o = 0; o < outlineRects.length; o++) {
     innerOutlineLayout.add(outlineRects[o]);
   }
+
+  const outlineCont: OutlineContent = {
+    outlineTitle,
+    outlineRects,
+    outlineLayout,
+  }
+
+  return outlineCont;
 }
 
-function* focusOnOutlineIndex(index: number, duration: number, scale: number) {
-  const focusRect: Rect = outlineRects[index];
+function* focusOnOutlineIndex(outlineCont: OutlineContent, index: number, duration: number, scale: number) {
+  const focusRect: Rect = outlineCont.outlineRects[index];
 
   yield* all(
     focusRect.opacity(1.0, duration, easeInOutCubic),
     focusRect.scale(scale, duration, easeInOutCubic),
 
-    ...outlineRects.slice(0, index).map((content) =>
+    ...outlineCont.outlineRects.slice(0, index).map((content) =>
       all(
         content.opacity(0.4, duration, easeInOutCubic),
         content.scale(1.0, duration, easeInOutCubic),
       )
     ),
-    ...outlineRects.slice(index + 1).map((content) =>
+    ...outlineCont.outlineRects.slice(index + 1).map((content) =>
       all(
         content.opacity(0.4, duration, easeInOutCubic),
         content.scale(1.0, duration, easeInOutCubic),
@@ -110,4 +120,4 @@ function* focusOnOutlineIndex(index: number, duration: number, scale: number) {
   );
 }
 
-export { setup, focusOnOutlineIndex, outlineTitle, outlineRects, outlineLayout };
+export { OutlineContent, setup, focusOnOutlineIndex, };

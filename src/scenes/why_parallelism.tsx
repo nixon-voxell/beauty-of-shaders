@@ -1,5 +1,5 @@
 import { COLOR } from "../styles"
-import { outlineRects, outlineLayout, setup, focusOnOutlineIndex, outlineTitle } from "../utils/outline_util";
+import { OutlineContent, setup, focusOnOutlineIndex } from "../utils/outline_util";
 import {
   ContentRectConfig, MultiContentRect,
   createMulContentRects,
@@ -10,8 +10,8 @@ import {
 import { animateDistanceLine, createDistanceLine } from "../utils/arrow_util";
 import { animSquareGrid, createSquareGrid, SquareGridConfig } from "../utils/grid_util";
 
-import {makeScene2D} from "@motion-canvas/2d/lib/scenes";
-import { CodeBlock } from '@motion-canvas/2d/lib/components/CodeBlock';
+import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
+import { CodeBlock, edit, insert, remove } from '@motion-canvas/2d/lib/components/CodeBlock';
 import { Circle, Layout, Line, Rect, Txt } from "@motion-canvas/2d/lib/components";
 import { beginSlide } from "@motion-canvas/core/lib/utils";
 import { all, chain, delay, sequence } from "@motion-canvas/core/lib/flow";
@@ -22,12 +22,12 @@ import { cancel, ThreadGenerator } from "@motion-canvas/core/lib/threading";
 
 export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);
-  yield setup();
+  const outlineCont: OutlineContent = setup();
 
-  view.add(outlineTitle);
-  view.add(outlineLayout);
+  view.add(outlineCont.outlineTitle);
+  view.add(outlineCont.outlineLayout);
 
-  yield* focusOnOutlineIndex(0, 0.0, 1.2);
+  yield* focusOnOutlineIndex(outlineCont, 0, 0.0, 1.2);
 
   const transCircle: Circle = new Circle({
     size: view.size.x() * 2.0,
@@ -40,7 +40,7 @@ export default makeScene2D(function* (view) {
 
   view.add(transCircle);
 
-  transCircle.absolutePosition(outlineRects[0].absolutePosition);
+  transCircle.absolutePosition(outlineCont.outlineRects[0].absolutePosition);
 
   // yield* beginSlide("Transition to outline");
 
@@ -51,14 +51,14 @@ export default makeScene2D(function* (view) {
 
   yield* beginSlide("Focus on 'Introduction to shaders'");
 
-  yield* focusOnOutlineIndex(1, 0.6, 1.2);
+  yield* focusOnOutlineIndex(outlineCont, 1, 0.6, 1.2);
 
   const topics = [
     "0. Why do we need parallelism?",
     "1. Coordinate systems",
     "2. Basic mesh concepts",
     "3. Graphics pipeline",
-    "4. Vertex & fragment shaders"
+    // "4. Vertex & fragment shaders"
   ];
 
   const topicConfig: ContentRectConfig = {
@@ -71,7 +71,7 @@ export default makeScene2D(function* (view) {
   }
 
   const topicLayout: Layout = new Layout({
-    position: new Vector2(400.0, -400.0),
+    position: new Vector2(400.0, -300.0),
   });
 
   const topicRects: MultiContentRect = createMulContentRects(
@@ -124,15 +124,15 @@ export default makeScene2D(function* (view) {
     // fade out outline
     sequence(
       0.1,
-      ...outlineRects.map((rect) =>
+      ...outlineCont.outlineRects.map((rect) =>
         all(
           rect.scale(0.8, 0.6, easeInOutCubic),
           rect.opacity(0.0, 0.6, easeInOutCubic),
         )
       ),
     ),
-    outlineTitle.scale(0.2, 0.6, easeInOutCubic),
-    outlineTitle.opacity(0.0, 0.6, easeInOutCubic),
+    outlineCont.outlineTitle.scale(0.2, 0.6, easeInOutCubic),
+    outlineCont.outlineTitle.opacity(0.0, 0.6, easeInOutCubic),
 
     // fade out contents
     focusIdxMulContentRects(
@@ -147,7 +147,7 @@ export default makeScene2D(function* (view) {
         // move 'Why do we need parallelism to top left'
         rect0.scale(1.0, 0.6, easeInOutCubic),
         rect0.size(rect0.size().mul(0.7), 0.6, easeInOutCubic),
-        rect0.position(new Vector2(-1100.0, -40.0), 0.6, easeInOutCubic),
+        rect0.position(new Vector2(-1100.0, -140.0), 0.6, easeInOutCubic),
         rect0.opacity(0.6, 0.6, easeInOutCubic),
 
         txt0.scale(0.09, 0.6, easeInOutCubic),
@@ -349,13 +349,13 @@ export default makeScene2D(function* (view) {
   measureLine.shadowColor(COLOR.BLACK);
   measureLine.shadowBlur(24.0);
   const firstCenterDistCode: CodeBlock = new CodeBlock({
-    position: new Vector2(110.0, 150.0),
+    position: new Vector2(-100.0, 150.0),
+    offset: new Vector2(-1, 0),
     scale: 0.1,
     language: "hlsl",
     fill: COLOR.YELLOW,
     shadowBlur: 10.0,
     shadowColor: COLOR.BLACK,
-    // text: "sqrt((x1 - x0)^2 + (y1 - y0)^2)",
   });
 
   measureLine.add(firstCenterDistCode),
@@ -365,37 +365,24 @@ export default makeScene2D(function* (view) {
 
   yield* all(
     animateDistanceLine(measureLine, 0.6, easeInOutCubic),
-    firstCenterDistCode.code("sqrt((x1 - x0)^2 + (y1 - y0)^2)", 0.6),
+    firstCenterDistCode.edit(1.2, false)`${insert("sqrt((x1 - x0)^2 + (y1 - y0)^2)")}`,
   );
 
   yield* beginSlide("Replace variables with values");
 
-  yield* all(
-    firstCenterDistCode.code("sqrt((4 - 0)^2 + (4 - 0)^2)", 0.6),
-    firstCenterDistCode.position.x(firstCenterDistCode.position.x() - 20.0, 0.6, easeInOutCubic),
-  );
+  yield* firstCenterDistCode.edit(1.0, true)`sqrt(${edit("(x1 - x0)", "(4 - 0)")}^2 + ${edit("(y1 - y0)", "(4 - 0)")}^2)`;
 
   yield* beginSlide("Simplify equation #1");
 
-  yield* all(
-    firstCenterDistCode.code("sqrt(16 + 16)", 0.6),
-    firstCenterDistCode.position.x(firstCenterDistCode.position.x() - 90.0, 0.6, easeInOutCubic),
-  );
-  // yield* firstCenterDistTxt.position.x(firstCenterDistTxt.position.x() - 90.0, 0.6, easeInOutCubic);
+  yield* firstCenterDistCode.edit(1.0, true)`sqrt(${edit("(4 - 0)^2", "16")} + ${edit("(4 - 0)^2", "16")})`;
 
   yield* beginSlide("Simplify equation #2");
 
-  yield* all(
-    firstCenterDistCode.code("sqrt(32)", 0.6),
-    firstCenterDistCode.position.x(firstCenterDistCode.position.x() - 40.0, 0.6, easeInOutCubic),
-  );
+  yield* firstCenterDistCode.edit(1.0, true)`sqrt(${edit("16 + 16", "32")})`;
 
   yield* beginSlide("Simplify equation #3");
 
-  yield* all(
-    firstCenterDistCode.code("≈5.66", 0.6),
-    firstCenterDistCode.position.x(firstCenterDistCode.position.x() - 30.0, 0.6, easeInOutCubic),
-  );
+  yield* firstCenterDistCode.edit(1.0, true)`${edit("sqrt(32)", "≈5.66")}`;
 
   const greaterThanRadiusTxt: Txt = new Txt({
     position: new Vector2(20.0, 150.0),
@@ -430,7 +417,7 @@ export default makeScene2D(function* (view) {
   // cleanup
   yield* all(
     animateDistanceLine(measureLine, 0.6, easeInOutCubic, 0.5, 0.5, 0.0, 0.1, 0.0),
-    firstCenterDistCode.code("", 0.6, easeInOutCubic),
+    firstCenterDistCode.edit(0.6, false)`${edit("≈5.66", "")}`,
     centerPixCoordTxt.opacity(0.0, 0.6, easeInOutCubic),
     firstPixCoordTxt.opacity(0.0, 0.6, easeInOutCubic),
     greaterThanRadiusTxt.opacity(0.0, 0.6, easeInOutCubic),
@@ -550,7 +537,7 @@ export default makeScene2D(function* (view) {
       pixelsHeightTxtClone.rotation(0.0, 0.6, easeInOutCubic),
       pixelsHeightTxtClone.position(verbalCont.rect.position().addY(200.0), 0.6, easeInOutCubic),
     ),
-  )
+  );
 
   const multiplyTxt: Txt = new Txt({
     position: pixelsWidthTxtClone.position().addX(80.0),

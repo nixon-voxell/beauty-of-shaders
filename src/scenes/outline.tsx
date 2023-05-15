@@ -1,5 +1,5 @@
 import { COLOR } from "../styles"
-import { outlineRects, outlineLayout, setup, focusOnOutlineIndex, outlineTitle } from "../utils/outline_util";
+import { OutlineContent, setup, focusOnOutlineIndex } from "../utils/outline_util";
 
 import {makeScene2D} from "@motion-canvas/2d/lib/scenes";
 import { Circle } from "@motion-canvas/2d/lib/components";
@@ -9,14 +9,14 @@ import { easeInOutCubic, easeInOutQuint } from "@motion-canvas/core/lib/tweening
 
 export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);
-  yield setup();
+  const outlineCont: OutlineContent = setup();
 
-  view.add(outlineTitle);
-  view.add(outlineLayout);
+  view.add(outlineCont.outlineTitle);
+  view.add(outlineCont.outlineLayout);
 
-  for (let o = 0; o < outlineRects.length; o++) {
-    outlineRects[o].scale(0.6);
-    outlineRects[o].opacity(0.0);
+  for (let o = 0; o < outlineCont.outlineRects.length; o++) {
+    outlineCont.outlineRects[o].scale(0.6);
+    outlineCont.outlineRects[o].opacity(0.0);
   }
 
   yield* beginSlide("Outline")
@@ -24,7 +24,7 @@ export default makeScene2D(function* (view) {
   yield* all(
     sequence(
       0.1,
-      ...outlineRects.map((content) =>
+      ...outlineCont.outlineRects.map((content) =>
         all(
           content.scale(1.0, 0.6, easeInOutCubic),
           content.opacity(1.0, 0.6, easeInOutCubic),
@@ -35,13 +35,13 @@ export default makeScene2D(function* (view) {
 
   yield* beginSlide("Walk you through each section");
 
-  for (var o = 0; o < outlineRects.length; o++) {
-    yield* focusOnOutlineIndex(o, 0.4, 1.2);
+  for (var o = 0; o < outlineCont.outlineRects.length; o++) {
+    yield* focusOnOutlineIndex(outlineCont, o, 0.4, 1.2);
   }
 
   yield* beginSlide("Focus on 'What are Shaders Anyway?'");
 
-  yield* focusOnOutlineIndex(0, 0.6, 1.2);
+  yield* focusOnOutlineIndex(outlineCont, 0, 0.6, 1.2);
 
   const transCircle: Circle = new Circle({
     size: 0.0,
@@ -54,7 +54,7 @@ export default makeScene2D(function* (view) {
 
   view.add(transCircle);
 
-  transCircle.absolutePosition(outlineRects[0].absolutePosition);
+  transCircle.absolutePosition(outlineCont.outlineRects[0].absolutePosition);
 
   yield* beginSlide("Circle zoom in transition");
 

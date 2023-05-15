@@ -46,6 +46,4 @@ function* animateDistanceLine(
   );
 }
 
-export {
-  createDistanceLine, animateDistanceLine
-}
+export { createDistanceLine, animateDistanceLine, };

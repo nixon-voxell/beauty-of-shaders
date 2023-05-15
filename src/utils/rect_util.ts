@@ -11,12 +11,12 @@ type ContentRectConfig = {
   fill: string,
   txtScale: number,
   txtFill: string,
-}
+};
 
 type ContentRect = {
   rect: Rect,
   txt: Txt,
-}
+};
 
 function createContentRect(
   cont: SignalValue<string>, position: SignalValue<PossibleVector2<number>>,
@@ -96,12 +96,12 @@ export {
   ContentRect, createContentRect,
   positionContentRect, moveContentRect, fadeContentRect, scaleContentRect,
   changeContentTxt, scaleContentTxt,
-}
+};
 
 type MultiContentRect = {
   rects: Rect[],
   txts: Txt[],
-}
+};
 
 function createMulContentRects(
   contTxts: string[],
@@ -265,4 +265,4 @@ export {
   moveMulContentRects, fadeMulContentRects, scaleMulContentRects,
   sameTxtMulContentRects, changeTxtMulContentRects,
   focusIdxMulContentRects,
-}
+};

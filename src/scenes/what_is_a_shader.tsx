@@ -1,11 +1,12 @@
 import { COLOR } from "../styles";
 import { rectScaleReview } from "../utils/anim_util"
 import { SquareGridConfig, createSquareGrid, animSquareGrid } from "../utils/grid_util";
+import { BarConfig, BarGroup, createBarGroup, animateBarGroup, } from "../utils/bar_util";
 
-import { Line, Rect, Txt } from "@motion-canvas/2d/lib/components";
+import { Layout, Line, Rect, Txt } from "@motion-canvas/2d/lib/components";
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
 import { all, delay, sequence } from "@motion-canvas/core/lib/flow";
-import { easeInOutCubic, easeInOutSine } from "@motion-canvas/core/lib/tweening";
+import { easeInOutCubic, easeInOutExpo, easeInOutSine } from "@motion-canvas/core/lib/tweening";
 import { Vector2 } from "@motion-canvas/core/lib/types";
 import { beginSlide, useRandom } from "@motion-canvas/core/lib/utils";
 
@@ -34,44 +35,30 @@ export default makeScene2D(function* (view) {
 
   yield* all (
     rectScaleReview(shaderRect, 0.6, 0.9, easeInOutCubic),
-    // shaderRect.size(deviceRectSize, 0.6, easeInOutCubic),
     shaderRect.opacity(1.0, 0.6, easeInOutCubic),
     shaderTxt.text("Shader", 0.6, easeInOutCubic),
   );
 
-  const lineRect: Rect = new Rect({
-    size: new Vector2(0.0, 20.0),
-    radius: 4.0,
-    fill: COLOR.BLACK,
+  const shaderBarLayout: Layout = new Layout({
+    position: new Vector2(-60.0, -30.0),
   });
+  shaderRect.add(shaderBarLayout);
 
-  const lineCount: number = 5;
-  const lineGap: number = 32.0;
-  const minLineLength: number = 50.0;
-  const maxLineLength: number = 140.0;
-  const lineRects: Rect[] = new Array<Rect>();
-  const lineLengths: number[] = random.floatArray(lineCount, minLineLength, maxLineLength);
-
-  for (var l = 0; l < lineCount; l++) {
-    const line: Rect = lineRect.clone();
-    lineRects.push(line);
-    shaderRect.add(line);
-
-    // move to animation start position
-    line.position.x(-lineLengths[l] / 2);
-    line.position.y(-30.0 + lineGap * l);
+  const shaderBarConfig: BarConfig = {
+    count: 5,
+    gap: 12,
+    height: 20.0,
+    minLength: 50.0,
+    maxLength: 140.0,
   }
 
+  const shaderBar: BarGroup = createBarGroup(
+    shaderBarConfig, COLOR.BLACK,
+    random, shaderBarLayout
+  )
+
   yield* shaderTxt.position.y(shaderTxt.position.y() - 80.0, 0.6),
-  yield* sequence(
-    0.1,
-    ...lineRects.map((line, index) =>
-      all(
-        line.size.x(lineLengths[index], 0.4, easeInOutCubic),
-        line.position.x(0.0 - (maxLineLength - lineLengths[index]) * 0.5, 0.4, easeInOutCubic),
-      )
-    )
-  );
+  yield* animateBarGroup(shaderBar, 0.06, 0.4, easeInOutExpo);
 
   yield* beginSlide("Show GPU device");
 
