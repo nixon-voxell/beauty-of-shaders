@@ -16,11 +16,11 @@ export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);
   const random = useRandom(7919);
 
-  const titleCont: ContentRect = createTitleCont("2. Basic mesh concepts", view);
+  const titleCont: ContentRect = createTitleCont("1. Basic mesh concepts", view);
 
   yield* beginSlide("Change title");
 
-  yield* changeTitleAtCenter(titleCont, "3. Graphics pipeline");
+  yield* changeTitleAtCenter(titleCont, "2. Graphics pipeline");
 
   yield* beginSlide("Move title to top left");
 

@@ -13,11 +13,11 @@ import { createSignal, SimpleSignal } from "@motion-canvas/core/lib/signals";
 export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);
 
-  const titleCont: ContentRect = createTitleCont("1. Coordinate systems", view);
+  const titleCont: ContentRect = createTitleCont("0. Why do we need parallelism?", view);
 
   yield* beginSlide("Change title");
 
-  yield* changeTitleAtCenter(titleCont, "2. Basic mesh concepts");
+  yield* changeTitleAtCenter(titleCont, "1. Basic mesh concepts");
 
   yield* beginSlide("Move title to top left");
 

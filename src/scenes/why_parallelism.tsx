@@ -55,10 +55,9 @@ export default makeScene2D(function* (view) {
 
   const topics = [
     "0. Why do we need parallelism?",
-    "1. Coordinate systems",
-    "2. Basic mesh concepts",
-    "3. Graphics pipeline",
-    // "4. Vertex & fragment shaders"
+    "1. Basic mesh concepts",
+    "2. Graphics pipeline",
+    "3. Coordinate systems",
   ];
 
   const topicConfig: ContentRectConfig = {
