@@ -593,8 +593,15 @@ export default makeScene2D(function* (view) {
 
   yield* beginSlide("Fade out grid");
 
-  yield* all(
-    grid.scale(0.8, 0.6, easeInOutCubic),
-    grid.opacity(0.0, 0.6, easeInOutCubic),
+  yield* sequence(
+    0.1,
+    all(
+      grid.scale(0.8, 0.6, easeInOutCubic),
+      grid.opacity(0.0, 0.6, easeInOutCubic),
+    ),
+    all(
+      titleCont.rect.scale(0.8, 0.6, easeInOutCubic),
+      titleCont.rect.opacity(0.0, 0.6, easeInOutCubic),
+    ),
   );
 });

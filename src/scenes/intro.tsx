@@ -207,7 +207,7 @@ export default makeScene2D(function* (view) {
       instaQRImg.scale(0.5, 0.4, easeInOutCubic),
       instaQRImg.opacity(0.0, 0.4, easeInOutCubic),
     ),
-  )
+  );
 
   yield* all(
     backdrop().opacity(1.0, 1.0, easeInOutQuart),

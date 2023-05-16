@@ -391,8 +391,6 @@ export default makeScene2D(function* (view) {
     all(
       rasterizerTitle.scale(0.1, 0.6, easeInOutCubic),
       rasterizerTitle.opacity(0.0, 0.6, easeInOutCubic),
-      titleCont.rect.scale(0.1, 0.6, easeInOutCubic),
-      titleCont.rect.opacity(0.0, 0.6, easeInOutCubic),
     ),
   )
 });
