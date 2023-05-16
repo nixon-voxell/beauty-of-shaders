@@ -14,7 +14,7 @@ export default makeProject({
     intro,
     outline,
     what_is_a_shader,
-    types_of_shaders,
+    // types_of_shaders,
     why_parallelism,
     basic_mesh_concepts,
     graphics_pipeline,

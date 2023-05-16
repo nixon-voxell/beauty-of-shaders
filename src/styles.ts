@@ -8,6 +8,7 @@ export const COLOR = {
   BLUE: "#68ABDF",
   BLUE_SHADOW: "rgba(104, 171, 223, 0.6)",
   LIGHT_BLUE: "rgb(145, 158, 222)",
+  CYAN: "rgb(0, 255, 255)",
 
   WHITE: "rgb(230, 230, 230)",
   WHITE_SHADOW: "rgba(230, 230, 230, 0.6)",
