@@ -61,9 +61,9 @@ export default makeScene2D(function* (view) {
   yield* all(
     backdrop().size.x("65%", 1.0, easeInOutQuint),
     title0().text("Coding Adventure #1", 1.0),
-  )
+  );
 
-  yield* beginSlide("Beauty of Shaders")
+  yield* beginSlide("Beauty of Shaders");
 
   yield* all(
     backdrop().fill(COLOR.BLUE, 1.0, easeInOutCubic, Color.createLerp("lab")),

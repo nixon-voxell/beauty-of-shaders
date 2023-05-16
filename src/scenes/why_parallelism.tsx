@@ -353,7 +353,6 @@ export default makeScene2D(function* (view) {
     offset: new Vector2(-1, 0),
     scale: 0.1,
     language: "hlsl",
-    fill: COLOR.YELLOW,
     shadowBlur: 10.0,
     shadowColor: COLOR.BLACK,
   });
