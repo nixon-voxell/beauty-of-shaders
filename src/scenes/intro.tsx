@@ -109,6 +109,12 @@ export default makeScene2D(function* (view) {
     opacity: 0.0,
   });
 
+  const instaTag: Txt = new Txt({
+    y: 640.0,
+    scale: 0.6,
+    fill: COLOR.WHITE,
+    text: "@voxelltech",
+  });
   const linkTreeInBio: Txt = new Txt({
     y: 500.0,
     scale: 0.3,
@@ -116,6 +122,7 @@ export default makeScene2D(function* (view) {
     text: "Linktree in bio",
   });
 
+  instaLogoImg.add(instaTag);
   instaQRImg.add(linkTreeInBio);
   view.add(instaLogoImg);
   view.add(voxellImg);
