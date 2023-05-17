@@ -11,7 +11,7 @@ import { animateDistanceLine, createDistanceLine } from "../utils/arrow_util";
 import { animSquareGrid, createSquareGrid, SquareGridConfig } from "../utils/grid_util";
 
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
-import { CodeBlock, edit, insert, remove } from '@motion-canvas/2d/lib/components/CodeBlock';
+import { CodeBlock, edit, insert } from '@motion-canvas/2d/lib/components/CodeBlock';
 import { Circle, Layout, Line, Rect, Txt } from "@motion-canvas/2d/lib/components";
 import { beginSlide } from "@motion-canvas/core/lib/utils";
 import { all, chain, delay, sequence } from "@motion-canvas/core/lib/flow";
@@ -40,7 +40,7 @@ export default makeScene2D(function* (view) {
 
   view.add(transCircle);
 
-  transCircle.absolutePosition(outlineCont.outlineRects[0].absolutePosition);
+  transCircle.absolutePosition(outlineCont.outlineRects[0].absolutePosition());
 
   // yield* beginSlide("Transition to outline");
 

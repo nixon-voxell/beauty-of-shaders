@@ -2,6 +2,8 @@ import { COLOR } from "../styles"
 import instaLogo from "../../images/instalogo.svg"
 import voxell from "../../images/voxell.png"
 import instaQR from "../../images/instaqr.png"
+import { Three } from "../components/Three"
+import * as network from "./three/network"
 
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
 import { Layout, Rect, Txt, Img } from "@motion-canvas/2d/lib/components";
@@ -12,6 +14,19 @@ import { Color, Vector2 } from "@motion-canvas/core/lib/types";
 
 export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);
+
+  yield network.setupScene();
+
+  const three: Three = new Three({
+    quality: 2,
+    width: 1920,
+    height: 1080,
+    zoom: 1080,
+    camera: network.camera,
+    scene: network.threeScene,
+  });
+
+  view.add(three);
 
   const selfIntroTitle: Txt = new Txt({
     scale: 0.2,
