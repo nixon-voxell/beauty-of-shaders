@@ -1,8 +1,13 @@
+import { all, loop, waitFor } from "@motion-canvas/core/lib/flow";
+import { ThreadGenerator } from "@motion-canvas/core/lib/threading";
 import * as THREE from "three";
 import networkFragment from "./shaders/network.fragment.glsl?raw";
 import networkVertex from "./shaders/network.vertex.glsl?raw";
 
 const networkMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    utime: { value: 0.0 }
+  },
   vertexShader: networkVertex,
   fragmentShader: networkFragment,
   transparent: true,
@@ -19,15 +24,13 @@ const orbit = new THREE.Group();
 orbit.add(camera);
 threeScene.add(orbit);
 
-async function setupScene() {
+function setupScene() {
   orbit.position.set(0, 0, 0);
   orbit.rotation.set(0, 0, 0);
   camera.rotation.set(0, 0, 0);
   camera.position.set(0, 0, 540);
 
   planeMesh.scale.set(1920.0, 1080.0, 1.0);
-
-  // useScene().LifecycleEvents.onBeginRender.subscribe(apply);
 }
 
-export { threeScene, camera, orbit, setupScene };
+export { threeScene, camera, orbit, setupScene, planeMesh };

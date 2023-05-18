@@ -8,14 +8,22 @@ import * as network from "./three/network"
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
 import { Layout, Rect, Txt, Img } from "@motion-canvas/2d/lib/components";
 import { beginSlide, createRef } from "@motion-canvas/core/lib/utils";
-import { all, chain, sequence } from "@motion-canvas/core/lib/flow";
+import { all, chain, loop, sequence } from "@motion-canvas/core/lib/flow";
 import { easeInOutCubic, easeInOutQuart, easeInOutQuint } from "@motion-canvas/core/lib/tweening";
 import { Color, Vector2 } from "@motion-canvas/core/lib/types";
+import { cancel, ThreadGenerator } from "@motion-canvas/core/lib/threading"
 
 export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);
 
-  yield network.setupScene();
+  network.setupScene();
+  const networkLoopTask: ThreadGenerator = yield loop(
+    Infinity,
+    () => {
+      console.log("test");
+      network.planeMesh.material.uniforms.utime.value += 0.016;
+    }
+  );
 
   const three: Three = new Three({
     quality: 2,
@@ -37,6 +45,7 @@ export default makeScene2D(function* (view) {
 
   view.add(selfIntroTitle);
 
+  network.planeMesh.material.uniforms.utime.value = 0.0;
   yield* beginSlide("Show speaker name");
 
   yield* all(
@@ -267,4 +276,6 @@ export default makeScene2D(function* (view) {
   );
 
   yield* title1().position(new Vector2(-500.0, -400.0), 1.0, easeInOutCubic);
+
+  cancel(networkLoopTask);
 });
