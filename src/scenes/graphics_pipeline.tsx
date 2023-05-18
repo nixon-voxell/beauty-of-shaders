@@ -120,7 +120,7 @@ export default makeScene2D(function* (view) {
   );
 
   const rasterizerTitle: Txt = new Txt({
-    y: -300.0,
+    y: -340.0,
     scale: 0.1,
     fill: COLOR.WHITE,
     text: "Rasterizer",
@@ -132,13 +132,13 @@ export default makeScene2D(function* (view) {
   yield* beginSlide("Show rasterizer title");
 
   yield* all(
-    rasterizerTitle.scale(0.2, 0.6, easeInOutCubic),
+    rasterizerTitle.scale(0.3, 0.6, easeInOutCubic),
     rasterizerTitle.opacity(1.0, 0.6, easeInOutCubic),
   );
 
   const canIMoveThisTxt: Txt = new Txt({
     y: -40.0,
-    scale: 0.1,
+    scale: 0.15,
     fill: COLOR.BLUE,
     text: "can I move this?",
   });

@@ -52,7 +52,7 @@ export default makeScene2D(function* (view) {
   const triVertTxts: Txt[] = new Array<Txt>(3);
   const vertexTxt: Txt = new Txt({
     position: (points0[0]() as Vector2).addY(-60.0),
-    scale: 0.1,
+    scale: 0.15,
     fill: COLOR.BLUE,
   });
   const faceTxt: Txt = new Txt({
@@ -179,7 +179,7 @@ export default makeScene2D(function* (view) {
     gap: 0.0,
     fill: COLOR.WHITE_SHADOW,
     txtFill: COLOR.BLACK,
-    txtScale: 0.1,
+    txtScale: 0.12,
   };
 
   const vertArrayLayout: Layout = new Layout({
@@ -240,11 +240,11 @@ export default makeScene2D(function* (view) {
   yield* sequence(
     0.1,
     all(
-      vertArrayLbl.scale(0.1, 0.6, easeInOutCubic),
+      vertArrayLbl.scale(0.15, 0.6, easeInOutCubic),
       vertArrayLbl.opacity(1.0, 0.6, easeInOutCubic),
     ),
     all(
-      idxArrayLbl.scale(0.1, 0.6, easeInOutCubic),
+      idxArrayLbl.scale(0.15, 0.6, easeInOutCubic),
       idxArrayLbl.opacity(1.0, 0.6, easeInOutCubic),
     ),
   );
@@ -285,6 +285,39 @@ export default makeScene2D(function* (view) {
   yield* beginSlide("Highlight face #0");
 
   yield* triangle0.fill(COLOR.GREEN, 0.3, easeInOutCubic);
+
+  yield* beginSlide("Highlight idx array #1");
+
+  yield* chain(
+    // fade out previously highlighted areas
+    sequence(
+      0.05,
+      ...idxArrayCont.rects.map(idx => idx.fill(COLOR.WHITE_SHADOW, 0.3, easeInOutCubic)),
+      ...vertArrayCont.rects.map(vert => vert.fill(COLOR.WHITE_SHADOW, 0.3, easeInOutCubic)),
+      triangle0.fill(COLOR.WHITE_SHADOW, 0.3, easeInOutCubic),
+    ),
+    sequence(
+      0.1,
+      ...idxArrayCont.rects.slice(3).map((idx) =>
+        idx.fill(COLOR.GREEN, 0.3, easeInOutCubic),
+      ),
+    )
+  );
+
+  yield* beginSlide("Highlight vert array #1");
+
+  yield* sequence(
+    0.1,
+    ...vertArrayCont.rects.slice(1).map((vert) =>
+      chain(
+      vert.fill(COLOR.GREEN, 0.3, easeInOutCubic),
+      )
+    ),
+  );
+
+  yield* beginSlide("Highlight face #1");
+
+  yield* triangle1.fill(COLOR.GREEN, 0.3, easeInOutCubic);
 
   yield* beginSlide("Fade out scene");
 

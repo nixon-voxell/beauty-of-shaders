@@ -8,8 +8,8 @@ import * as network from "./three/network"
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
 import { Layout, Rect, Txt, Img } from "@motion-canvas/2d/lib/components";
 import { beginSlide, createRef } from "@motion-canvas/core/lib/utils";
-import { all, chain, loop, sequence } from "@motion-canvas/core/lib/flow";
-import { easeInOutCubic, easeInOutQuart, easeInOutQuint } from "@motion-canvas/core/lib/tweening";
+import { all, chain, loop, sequence, waitFor } from "@motion-canvas/core/lib/flow";
+import { easeInOutCubic, easeInOutQuart, easeInOutQuint, tween } from "@motion-canvas/core/lib/tweening";
 import { Color, Vector2 } from "@motion-canvas/core/lib/types";
 import { cancel, ThreadGenerator } from "@motion-canvas/core/lib/threading"
 
@@ -20,7 +20,6 @@ export default makeScene2D(function* (view) {
   const networkLoopTask: ThreadGenerator = yield loop(
     Infinity,
     () => {
-      console.log("test");
       network.planeMesh.material.uniforms.utime.value += 0.016;
     }
   );
@@ -40,6 +39,8 @@ export default makeScene2D(function* (view) {
     scale: 0.2,
     fill: COLOR.WHITE,
     text: "Nixon",
+    shadowColor: COLOR.BLACK,
+    shadowBlur: 20.0,
     opacity: 0.0,
   });
 
@@ -58,7 +59,9 @@ export default makeScene2D(function* (view) {
     scale: 0.8,
     size: new Vector2(1000.0, 500.0),
     radius: 60.0,
-    fill: COLOR.BLUE,
+    fill: COLOR.BLUE_SHADOW,
+    shadowColor: COLOR.BLACK,
+    shadowBlur: 10.0,
     opacity: 0.0,
   });
   const infos: string[] = [
@@ -116,6 +119,8 @@ export default makeScene2D(function* (view) {
     position: new Vector2(-400.0, -180.0),
     scale: 0.1,
     src: instaLogo,
+    shadowColor: COLOR.BLACK,
+    shadowBlur: 20.0,
     opacity: 0.0,
   });
   const voxellImg: Img = new Img({
@@ -130,6 +135,8 @@ export default makeScene2D(function* (view) {
     position: new Vector2(200.0, 0.0),
     scale: 0.5,
     src: instaQR,
+    shadowColor: COLOR.BLACK,
+    shadowBlur: 20.0,
     opacity: 0.0,
   });
 
@@ -156,6 +163,7 @@ export default makeScene2D(function* (view) {
 
   yield* chain(
     all(
+      // three.opacity(0.5, 0.6, easeInOutCubic),
       infoRect.scale(0.8, 0.6, easeInOutCubic),
       infoRect.opacity(0.0, 0.6, easeInOutCubic),
       selfIntroTitle.text("Find me here", 0.6),
@@ -178,28 +186,19 @@ export default makeScene2D(function* (view) {
     ),
   );
 
-  const backdrop = createRef<Rect>();
+  // const backdrop = createRef<Rect>();
   const title0 = createRef<Txt>();
   const title1 = createRef<Txt>();
 
   view.add(
     <>
-      <Rect
-        cache
-        ref={backdrop}
-        width={"60%"}
-        height={"0%"}
-        fill={COLOR.GREEN}
-        radius={40}
-        smoothCorners
-        opacity={0.0}
-      >
-      </Rect>
       <Txt
         ref={title0}
         scale={0.3}
         opacity={0.0}
-        fill={COLOR.BLACK}
+        fill={COLOR.WHITE}
+        shadowColor={COLOR.BLACK}
+        shadowBlur={20.0}
       >
         Coding Adventure
       </Txt>
@@ -207,7 +206,9 @@ export default makeScene2D(function* (view) {
         ref={title1}
         scale={0.3}
         opacity={0.0}
-        fill={COLOR.BLACK}
+        fill={COLOR.WHITE}
+        shadowColor={COLOR.BLACK}
+        shadowBlur={20.0}
       >
         Beauty of Shaders
       </Txt>
@@ -241,41 +242,39 @@ export default makeScene2D(function* (view) {
   );
 
   yield* all(
-    backdrop().opacity(1.0, 1.0, easeInOutQuart),
-    backdrop().size.y("50%", 1.0, easeInOutQuart),
-    title0().opacity(1.0, 1.0, easeInOutQuart),
+    title0().opacity(1.0, 0.6, easeInOutQuart),
+    title0().scale(0.5, 0.6, easeInOutQuart),
   );
 
   yield* beginSlide("#1");
 
   yield* all(
-    backdrop().size.x("65%", 1.0, easeInOutQuint),
     title0().text("Coding Adventure #1", 1.0),
   );
 
   yield* beginSlide("Beauty of Shaders");
 
   yield* all(
-    backdrop().fill(COLOR.BLUE, 1.0, easeInOutCubic, Color.createLerp("lab")),
     title0().position.y(title0OriginPos.y - 100.0, 1.0, easeInOutQuint),
     title0().scale(0.2, 1.0, easeInOutQuint),
-    title0().fill(COLOR.INDIGO, 1.0, easeInOutCubic, Color.createLerp("lab")),
+    title0().fill(COLOR.LIGHT_BLUE, 1.0, easeInOutCubic, Color.createLerp("lab")),
     title1().opacity(1.0, 1.0, easeInOutQuint),
+    title1().scale(0.5, 1.0, easeInOutQuint),
     title1().position.y(title1OriginPos.y + 50.0, 1.0, easeInOutQuint),
   );
 
   yield* beginSlide("Closing");
 
-	yield* all(
-    backdrop().size.x("50%", 0.6, easeInOutCubic),
-    backdrop().size.y("30%", 0.6, easeInOutCubic),
-    backdrop().opacity(0.0, 0.6, easeInOutCubic),
-    title0().position(title0OriginPos, 0.6, easeInOutQuint),
-    title0().opacity(0.0, 0.6, easeInOutQuint),
-    title1().fill(COLOR.WHITE, 0.6, easeInOutCubic),
+	yield* sequence(
+    0.3,
+    tween(2.0, value => network.planeMesh.material.uniforms.opacity.value = 1.0 - easeInOutCubic(value)),
+    all(
+      title0().position(title0OriginPos, 0.6, easeInOutQuint),
+      title0().opacity(0.0, 0.6, easeInOutQuint),
+    ),
+    all(
+      title1().position(new Vector2(-500.0, -400.0), 1.0, easeInOutCubic),
+      title1().scale(0.3, 1.0, easeInOutCubic),
+    ),
   );
-
-  yield* title1().position(new Vector2(-500.0, -400.0), 1.0, easeInOutCubic);
-
-  cancel(networkLoopTask);
 });

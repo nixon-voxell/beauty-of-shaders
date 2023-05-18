@@ -6,7 +6,8 @@ import networkVertex from "./shaders/network.vertex.glsl?raw";
 
 const networkMaterial = new THREE.ShaderMaterial({
   uniforms: {
-    utime: { value: 0.0 }
+    utime: { value: 0.0 },
+    opacity: { value: 1.0 }
   },
   vertexShader: networkVertex,
   fragmentShader: networkFragment,
@@ -31,6 +32,8 @@ function setupScene() {
   camera.position.set(0, 0, 540);
 
   planeMesh.scale.set(1920.0, 1080.0, 1.0);
+  planeMesh.material.uniforms.utime.value = 0.0;
+  planeMesh.material.uniforms.opacity.value = 1.0;
 }
 
 export { threeScene, camera, orbit, setupScene, planeMesh };
