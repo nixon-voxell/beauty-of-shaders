@@ -8,10 +8,10 @@ import * as network from "./three/network"
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
 import { Layout, Rect, Txt, Img } from "@motion-canvas/2d/lib/components";
 import { beginSlide, createRef } from "@motion-canvas/core/lib/utils";
-import { all, chain, loop, sequence, waitFor } from "@motion-canvas/core/lib/flow";
+import { all, chain, loop, sequence } from "@motion-canvas/core/lib/flow";
 import { easeInOutCubic, easeInOutQuart, easeInOutQuint, tween } from "@motion-canvas/core/lib/tweening";
 import { Color, Vector2 } from "@motion-canvas/core/lib/types";
-import { cancel, ThreadGenerator } from "@motion-canvas/core/lib/threading"
+import { ThreadGenerator } from "@motion-canvas/core/lib/threading"
 
 export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);

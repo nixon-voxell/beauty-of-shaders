@@ -1,21 +1,21 @@
 import * as THREE from "three";
-import networkFragment from "./shaders/network.fragment.glsl?raw";
+import writeShaderFragment from "./shaders/write_shader.fragment.glsl?raw";
 import networkVertex from "./shaders/network.vertex.glsl?raw";
 
-const networkMaterial = new THREE.ShaderMaterial({
+const planeMaterial = new THREE.ShaderMaterial({
   uniforms: {
     utime: { value: 0.0 },
     opacity: { value: 1.0 },
   },
   vertexShader: networkVertex,
-  fragmentShader: networkFragment,
+  fragmentShader: writeShaderFragment,
   transparent: true,
   depthTest: true,
 });
 
 const threeScene = new THREE.Scene();
 const plane = new THREE.PlaneGeometry();
-const planeMesh = new THREE.Mesh(plane, networkMaterial);
+const planeMesh = new THREE.Mesh(plane, planeMaterial);
 threeScene.add(planeMesh);
 
 const camera = new THREE.PerspectiveCamera(90);

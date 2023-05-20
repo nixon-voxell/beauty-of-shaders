@@ -3,7 +3,7 @@ import { ContentRect, ContentRectConfig, createMulContentRects, fadeMulContentRe
 import { createTitleCont, changeTitleAtCenter, moveTitleToTopLeft } from "../utils/subtopic_util";
 
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
-import { Circle, Layout, Line, Txt } from "@motion-canvas/2d/lib/components";
+import { Circle, Layout, Line, Txt, Ray, Rect } from "@motion-canvas/2d/lib/components";
 import { beginSlide } from "@motion-canvas/core/lib/utils";
 import { all, chain, sequence } from "@motion-canvas/core/lib/flow";
 import { easeInOutCubic } from "@motion-canvas/core/lib/tweening";
@@ -23,7 +23,9 @@ export default makeScene2D(function* (view) {
 
   yield* moveTitleToTopLeft(titleCont);
 
-  const size0: SimpleSignal<number> = createSignal(90.0);
+  const triangleSize: number = 200.0;
+
+  const size0: SimpleSignal<number> = createSignal(140.0);
   const points0: SimpleSignal<PossibleVector2<number>>[] = new Array(3);
   points0[0] = createSignal(() => new Vector2(-size0(), -size0()));
   points0[1] = createSignal(() => new Vector2(size0(), -size0()));
@@ -45,7 +47,7 @@ export default makeScene2D(function* (view) {
   yield* sequence(
     0.1,
     triangle0.end(1.0, 0.6, easeInOutCubic),
-    size0(100.0, 0.6, easeInOutCubic),
+    size0(triangleSize, 0.6, easeInOutCubic),
   );
 
   const triVerts: Circle[] = new Array<Circle>(3);
@@ -57,7 +59,7 @@ export default makeScene2D(function* (view) {
   });
   const faceTxt: Txt = new Txt({
     position: () => ((points0[0]() as Vector2).add(points0[1]() as Vector2).add(points0[2]() as Vector2)).mul(0.3333),
-    scale: 0.1,
+    scale: 0.15,
     fill: COLOR.BLACK,
   });
 
@@ -65,7 +67,7 @@ export default makeScene2D(function* (view) {
     triVerts[p] = new Circle({
       position: points0[p],
       scale: 0.5,
-      size: 60.0,
+      size: 70.0,
       fill: COLOR.BLUE,
       shadowColor: COLOR.BLACK,
       shadowBlur: 10.0,
@@ -97,7 +99,7 @@ export default makeScene2D(function* (view) {
     ),
     ...triVertTxts.map((vertTxt) =>
       all(
-        vertTxt.scale(0.1, 0.4, easeInOutCubic),
+        vertTxt.scale(0.12, 0.4, easeInOutCubic),
         vertTxt.opacity(1.0, 0.4, easeInOutCubic),
       )
     ),
@@ -121,7 +123,7 @@ export default makeScene2D(function* (view) {
     points0[2](v2Origin, 0.6, easeInOutCubic),
   );
 
-  const size1: SimpleSignal<number> = createSignal(60.0);
+  const size1: SimpleSignal<number> = createSignal(140.0);
   const offset: SimpleSignal<number> = createSignal(10.0);
   const points1: SimpleSignal<PossibleVector2<number>>[] = new Array(3);
   points1[0] = createSignal(() => new Vector2(size1(), size1()).add(offset()));
@@ -139,7 +141,7 @@ export default makeScene2D(function* (view) {
 
   const vert3: Circle = new Circle({
     scale: 0.5,
-    size: 60.0,
+    size: 70.0,
     fill: COLOR.BLUE,
     position: points1[0],
     opacity: 0.0,
@@ -148,7 +150,7 @@ export default makeScene2D(function* (view) {
 
     children: [
       new Txt({
-        scale: 0.1,
+        scale: 0.12,
         fill: COLOR.BLACK,
         text: "v3",
       })
@@ -164,7 +166,7 @@ export default makeScene2D(function* (view) {
     triangle1.end(1.0, 0.6, easeInOutCubic),
     all(
       triangle1.fill(COLOR.WHITE_SHADOW, 0.6, easeInOutCubic),
-      size1(100.0, 0.6, easeInOutCubic),
+      size1(triangleSize, 0.6, easeInOutCubic),
       offset(0.0, 0.6, easeInOutCubic),
     ),
     all(
@@ -197,6 +199,31 @@ export default makeScene2D(function* (view) {
     ["0", "1", "2", "2", "1", "3"],
     arrayConfig, 0.0, idxArrayLayout, Vector2.right
   );
+  const idxArrayRays: Ray[] = new Array<Ray>(idxArrayCont.rects.length);
+
+  for (var r = 0 ; r < idxArrayRays.length; r++) {
+    const idxRect: Rect = idxArrayCont.rects[r];
+    const idxTxt: Txt = idxArrayCont.txts[r];
+
+    const targetVertex: number = parseInt(idxTxt.text());
+    const vertRect: Rect = vertArrayCont.rects[targetVertex];
+
+    const idxRay: Ray = new Ray({
+      from: idxRect.position,
+      to: vertRect.position().add(vertArrayLayout.position().sub(idxArrayLayout.position())),
+      lineWidth: 8.0,
+      stroke: COLOR.YELLOW,
+      shadowBlur: 10.0,
+      shadowColor: COLOR.BLACK,
+      endArrow: true,
+      arrowSize: 14.0,
+      opacity: 0.5,
+      end: 0.0,
+    });
+    idxArrayRays[r] = idxRay;
+
+    idxArrayLayout.add(idxRay);
+  }
 
   view.add(vertArrayLayout);
   view.add(idxArrayLayout);
@@ -261,6 +288,13 @@ export default makeScene2D(function* (view) {
       fadeMulContentRects(idxArrayCont, 1.0, 0.6, 0.1, easeInOutCubic),
     ),
   );
+
+  yield* beginSlide("Show idx array arrows");
+
+  yield* sequence(
+    1.0,
+    ...idxArrayRays.map(ray => ray.end(1.0, 1.0, easeInOutCubic)),
+  )
 
   yield* beginSlide("Highlight idx array #0");
 

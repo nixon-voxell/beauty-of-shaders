@@ -298,7 +298,7 @@ export default makeScene2D(function* (view) {
   }
 
   function getSquarePointWorldPos(idx: number): Vector2 {
-    return squarePoints[idx].absolutePosition().sub(centerPoint.absolutePosition());
+    return squarePoints[idx].absolutePosition().sub(centerPoint.absolutePosition()).scale(1.0 / view.scale().x);
   }
 
   const squarePointCoord: CodeBlock = new CodeBlock({
@@ -522,7 +522,7 @@ export default makeScene2D(function* (view) {
   yield* beginSlide("Show square point screen position");
 
   function getSquarePointScreenPos(idx: number): Vector2 {
-    return squarePoints[idx].absolutePosition().sub(screenOriginPoint.absolutePosition());
+    return squarePoints[idx].absolutePosition().sub(screenOriginPoint.absolutePosition()).scale(1.0 / view.scale().x);
   }
 
   yield* all(

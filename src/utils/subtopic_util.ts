@@ -15,7 +15,7 @@ function createTitleCont(title: string, parent: Layout): ContentRect {
     radius: 10.0,
     gap: 10.0,
     fill: COLOR.WHITE,
-    txtScale: 0.09,
+    txtScale: 0.095,
     txtFill: COLOR.BLACK,
   }
   const titleCont: ContentRect = createContentRect(
