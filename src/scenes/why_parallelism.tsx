@@ -550,16 +550,15 @@ export default makeScene2D(function* (view) {
     opacity: 0.0,
   });
   const resultTxt: Txt = new Txt({
-    position: pixelsHeightTxtClone.position().addX(120.0),
+    position: pixelsHeightTxtClone.position().addX(220.0),
     scale: 0.14,
-    offset: new Vector2(-1, 0),
     fill: COLOR.YELLOW,
     text: "81 pixels",
     opacity: 0.0,
   });
 
   const underlineRect: Rect = new Rect({
-    position: pixelsHeightTxtClone.position().add(new Vector2(190.0, 30.0)),
+    position: pixelsHeightTxtClone.position().add(new Vector2(160.0, 30.0)),
     size: new Vector2(0.0, 6.0),
     fill: COLOR.YELLOW,
   });
