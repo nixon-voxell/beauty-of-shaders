@@ -5,26 +5,59 @@ import {
   moveMulContentRects, fadeMulContentRects,
   focusIdxMulContentRects, scaleMulContentRects,
 } from "../utils/rect_util";
+import { Three } from "../components/Three"
+import * as network from "./three/network"
 
 import uvcoord from "../../images/uvcoord.png"
 import tools from "../../images/tools.png"
 import vector from "../../images/vector.png"
+import linear_algebra from "../../images/linear_algebra.png"
+import linear_algebraqr from "../../images/linear_algebraqr.png"
+import gpugems from "../../images/gpugems.png"
+import gpugemsqr from "../../images/gpugemsqr.png"
+import codingadv from "../../images/codingadv.png"
+import apulogo from "../../images/apulogo.png"
+import apugdclogo from "../../images/apugdclogo.png"
 
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
 import { Img, Layout, Rect, Txt } from "@motion-canvas/2d/lib/components";
 import { beginSlide } from "@motion-canvas/core/lib/utils";
 import { all, chain, loop, sequence } from "@motion-canvas/core/lib/flow";
-import { easeInOutCubic } from "@motion-canvas/core/lib/tweening";
+import { easeInOutCubic, tween } from "@motion-canvas/core/lib/tweening";
 import { Vector2 } from "@motion-canvas/core/lib/types";
+import { ThreadGenerator } from "@motion-canvas/core/lib/threading";
 
 export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);
+
+  network.setupScene();
+  const planeMat = network.planeMesh.material;
+  planeMat.uniforms.opacity.value = 0.0;
+  const networkLoopTask: ThreadGenerator = yield loop(
+    Infinity,
+    () => {
+      planeMat.uniforms.utime.value += 0.016;
+    }
+  );
+
+  const three: Three = new Three({
+    quality: 2,
+    width: 1920,
+    height: 1080,
+    zoom: 1080,
+    camera: network.camera,
+    scene: network.threeScene,
+  });
+
+  view.add(three);
 
   const title: Txt = new Txt({
     scale: 0.2,
     fill: COLOR.WHITE,
     text: "Tips & tricks for debugging shaders",
     opacity: 0.0,
+    shadowColor: COLOR.BLACK,
+    shadowBlur: 10.0,
   })
 
   view.add(title);
@@ -112,4 +145,138 @@ export default makeScene2D(function* (view) {
       ),
     );
   }
+
+  const nextImgStrs: string[] = [linear_algebra, gpugems];
+  const nextqrImgStrs: string[] = [linear_algebraqr, gpugemsqr];
+
+  const nextImgs: Img[] = new Array<Img>(nextImgStrs.length);
+  const nextqrImgs: Img[] = new Array<Img>(nextqrImgStrs.length);
+
+  const offsetY = 360.0;
+  const globalOffsetY = -80.0;
+  for (var n = 0; n < nextImgStrs.length; n++) {
+    const nextImg: Img = new Img({
+      y: n * offsetY + globalOffsetY,
+      x: -600.0,
+      offset: new Vector2(-1, 0),
+      scale: 0.2,
+      src: nextImgStrs[n],
+      opacity: 0.0,
+    });
+    const nextqrImg: Img = new Img({
+      y: n * offsetY + globalOffsetY,
+      x: 400.0,
+      offset: new Vector2(-1, 0),
+      scale: 0.2,
+      src: nextqrImgStrs[n],
+      opacity: 0.0,
+    });
+
+    view.add(nextImg);
+    view.add(nextqrImg);
+
+    nextImgs[n] = nextImg;
+    nextqrImgs[n] = nextqrImg;
+  }
+
+  yield* beginSlide("Fade out");
+
+  yield* all(
+    title.text("What's next?", 0.6),
+    fadeMulContentRects(tipCont, 0.0, 0.6, 0.1),
+    scaleMulContentRects(tipCont, 0.6, 0.6, 0.1),
+  );
+
+  yield* beginSlide("What's next");
+
+  yield* sequence(
+    0.1,
+    ...nextImgs.map(img => all(
+      img.scale(0.4, 0.6, easeInOutCubic),
+      img.opacity(1.0, 0.6, easeInOutCubic),
+    )),
+    ...nextqrImgs.map(img => all(
+      img.scale(0.4, 0.6, easeInOutCubic),
+      img.opacity(1.0, 0.6, easeInOutCubic),
+    )),
+  );
+
+  const codingadvImg: Img = new Img({
+    y: 200.0,
+    scale: 0.2,
+    src: codingadv,
+    shadowColor: COLOR.BLACK,
+    shadowBlur: 20.0,
+    opacity: 0.0,
+  });
+
+  const apulogoImg: Img = new Img({
+    x: -800.0,
+    y: 360.0,
+    scale: 0.02,
+    offset: new Vector2(0, -1),
+    src: apulogo,
+    shadowColor: COLOR.BLACK,
+    shadowBlur: 20.0,
+    opacity: 0.0,
+  });
+
+  const apugdclogoImg: Img = new Img({
+    x: -600.0,
+    y: 360.0,
+    scale: 0.05,
+    offset: new Vector2(0, -1),
+    src: apugdclogo,
+    shadowColor: COLOR.BLACK,
+    shadowBlur: 20.0,
+    opacity: 0.0,
+  });
+
+  view.add(codingadvImg);
+  view.add(apulogoImg);
+  view.add(apugdclogoImg);
+
+  yield* beginSlide("Thank you");
+
+  yield* chain(
+    sequence(
+      0.1,
+      ...nextImgs.map(img => all(
+        img.scale(0.2, 0.6, easeInOutCubic),
+        img.opacity(0.0, 0.6, easeInOutCubic),
+      )),
+      ...nextqrImgs.map(img => all(
+        img.scale(0.2, 0.6, easeInOutCubic),
+        img.opacity(0.0, 0.6, easeInOutCubic),
+      )),
+
+      // show thank you
+      tween(1.0, value => planeMat.uniforms.opacity.value = easeInOutCubic(value)),
+      title.text("Thank you!", 0.6),
+      all(
+        title.y(-100.0, 0.6, easeInOutCubic),
+        title.scale(0.5, 0.6, easeInOutCubic),
+      ),
+    ),
+
+    sequence(
+      0.1,
+      all(
+        codingadvImg.scale(0.4, 0.6, easeInOutCubic),
+        codingadvImg.opacity(1.0, 0.6, easeInOutCubic),
+      ),
+      all(
+        apugdclogoImg.scale(0.1, 0.6, easeInOutCubic),
+        apugdclogoImg.opacity(1.0, 0.6, easeInOutCubic),
+      ),
+      all(
+        apulogoImg.scale(0.04, 0.6, easeInOutCubic),
+        apulogoImg.opacity(1.0, 0.6, easeInOutCubic),
+      ),
+    )
+  );
+
+  yield* beginSlide("End!!!");
+
+  yield* view.opacity(0.0, 2.0, easeInOutCubic);
 });
