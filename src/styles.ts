@@ -12,6 +12,7 @@ export const COLOR = {
 
   WHITE: "rgb(230, 230, 230)",
   WHITE_SHADOW: "rgba(230, 230, 230, 0.6)",
+  DARK_SHADOW: "rgba(230, 230, 230, 0.2)",
   BLACK: "rgb(0, 5, 10)",
   TRANSPARENT: "rgba(0, 0, 0, 0.0)",
 }

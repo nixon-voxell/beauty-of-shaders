@@ -329,7 +329,7 @@ export default makeScene2D(function* (view) {
     squarePointCoord.opacity(1.0, 0.6, easeInOutCubic),
   )
 
-  yield* beginSlide("Show full equation");
+  yield* beginSlide("Show local to world equation");
 
   yield* squarePointCoord.edit(1.0, true)`${insert("mul(localToWorldMatrix, ")}[${
     `${getSquarePointLocalPos(2).x}, ${getSquarePointLocalPos(2).y}`
