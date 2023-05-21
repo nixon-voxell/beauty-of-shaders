@@ -1,7 +1,6 @@
 import { COLOR } from "../styles"
 import { Three } from "../components/Three"
 import * as write_shader from "./three/write_shader"
-
 import { OutlineContent, setup, focusOnOutlineIndex } from "../utils/outline_util";
 
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
@@ -557,11 +556,13 @@ void main() {
     ),
   );
 
+  yield* beginSlide("Focus on 'Debugging & what's next?'")
+
   yield* focusOnOutlineIndex(outlineCont, 3, 0.6, 1.2);
 
   transCircle.absolutePosition(outlineCont.outlineRects[3].absolutePosition());
 
-  yield* beginSlide("Focus on 'Debugging & what's next?'")
+  yield* beginSlide("Circle zoom in transition")
 
   yield* all(
     transCircle.size(view.size.x() * 2.0, 2.0, easeInOutCubic),

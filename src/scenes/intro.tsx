@@ -2,6 +2,7 @@ import { COLOR } from "../styles"
 import instaLogo from "../../images/instalogo.svg"
 import voxell from "../../images/voxell.png"
 import instaQR from "../../images/instaqr.png"
+import codingadv from "../../images/codingadv.png"
 import { Three } from "../components/Three"
 import * as network from "./three/network"
 
@@ -194,13 +195,14 @@ export default makeScene2D(function* (view) {
     <>
       <Txt
         ref={title0}
+        y={300.0}
         scale={0.3}
         opacity={0.0}
         fill={COLOR.WHITE}
         shadowColor={COLOR.BLACK}
         shadowBlur={20.0}
       >
-        Coding Adventure
+        Coding Adventure #1
       </Txt>
       <Txt
         ref={title1}
@@ -218,43 +220,60 @@ export default makeScene2D(function* (view) {
   const title0OriginPos = title0().position();
   const title1OriginPos = title1().position();
 
+  const codingadvImg: Img = new Img({
+    scale: 0.5,
+    src: codingadv,
+    shadowColor: COLOR.BLACK,
+    shadowBlur: 20.0,
+    opacity: 0.0,
+  });
+
+  view.add(codingadvImg);
+
   yield* beginSlide("Coding Adventure");
 
   // clear up self intro
-  yield* sequence(
-    0.05,
-    all(
-      selfIntroTitle.scale(0.2, 0.4, easeInOutCubic),
-      selfIntroTitle.opacity(0.0, 0.4, easeInOutCubic),
+  yield* chain(
+    sequence(
+      0.05,
+      all(
+        selfIntroTitle.scale(0.2, 0.4, easeInOutCubic),
+        selfIntroTitle.opacity(0.0, 0.4, easeInOutCubic),
+      ),
+      all(
+        instaLogoImg.scale(0.1, 0.4, easeInOutCubic),
+        instaLogoImg.opacity(0.0, 0.4, easeInOutCubic),
+      ),
+      all(
+        voxellImg.scale(0.2, 0.4, easeInOutCubic),
+        voxellImg.opacity(0.0, 0.4, easeInOutCubic),
+      ),
+      all(
+        instaQRImg.scale(0.5, 0.4, easeInOutCubic),
+        instaQRImg.opacity(0.0, 0.4, easeInOutCubic),
+      ),
     ),
+
     all(
-      instaLogoImg.scale(0.1, 0.4, easeInOutCubic),
-      instaLogoImg.opacity(0.0, 0.4, easeInOutCubic),
-    ),
-    all(
-      voxellImg.scale(0.2, 0.4, easeInOutCubic),
-      voxellImg.opacity(0.0, 0.4, easeInOutCubic),
-    ),
-    all(
-      instaQRImg.scale(0.5, 0.4, easeInOutCubic),
-      instaQRImg.opacity(0.0, 0.4, easeInOutCubic),
+      codingadvImg.opacity(1.0, 1.0, easeInOutCubic),
+      codingadvImg.scale(0.8, 1.0, easeInOutCubic),
     ),
   );
 
+  yield* beginSlide("Reveal coding adventure title");
+
   yield* all(
+    codingadvImg.scale(0.6, 0.6, easeInOutCubic),
+    codingadvImg.y(-100.0, 0.6, easeInOutCubic),
     title0().opacity(1.0, 0.6, easeInOutQuart),
     title0().scale(0.5, 0.6, easeInOutQuart),
-  );
-
-  yield* beginSlide("#1");
-
-  yield* all(
-    title0().text("Coding Adventure #1", 1.0),
   );
 
   yield* beginSlide("Beauty of Shaders");
 
   yield* all(
+    codingadvImg.scale(0.2, 0.6, easeInOutCubic),
+    codingadvImg.opacity(0.0, 0.6, easeInOutCubic),
     title0().position.y(title0OriginPos.y - 100.0, 1.0, easeInOutQuint),
     title0().scale(0.2, 1.0, easeInOutQuint),
     title0().fill(COLOR.LIGHT_BLUE, 1.0, easeInOutCubic, Color.createLerp("lab")),
