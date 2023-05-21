@@ -11,7 +11,7 @@ import { animateDistanceLine, createDistanceLine } from "../utils/arrow_util";
 import { animSquareGrid, createSquareGrid, SquareGridConfig } from "../utils/grid_util";
 
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
-import { CodeBlock, edit, insert, remove } from '@motion-canvas/2d/lib/components/CodeBlock';
+import { CodeBlock, edit, insert } from '@motion-canvas/2d/lib/components/CodeBlock';
 import { Circle, Layout, Line, Rect, Txt } from "@motion-canvas/2d/lib/components";
 import { beginSlide } from "@motion-canvas/core/lib/utils";
 import { all, chain, delay, sequence } from "@motion-canvas/core/lib/flow";
@@ -40,7 +40,7 @@ export default makeScene2D(function* (view) {
 
   view.add(transCircle);
 
-  transCircle.absolutePosition(outlineCont.outlineRects[0].absolutePosition);
+  transCircle.absolutePosition(outlineCont.outlineRects[0].absolutePosition());
 
   // yield* beginSlide("Transition to outline");
 
@@ -55,10 +55,9 @@ export default makeScene2D(function* (view) {
 
   const topics = [
     "0. Why do we need parallelism?",
-    "1. Coordinate systems",
-    "2. Basic mesh concepts",
-    "3. Graphics pipeline",
-    // "4. Vertex & fragment shaders"
+    "1. Basic mesh concepts",
+    "2. Graphics pipeline",
+    "3. Coordinate systems",
   ];
 
   const topicConfig: ContentRectConfig = {
@@ -150,7 +149,7 @@ export default makeScene2D(function* (view) {
         rect0.position(new Vector2(-1100.0, -140.0), 0.6, easeInOutCubic),
         rect0.opacity(0.6, 0.6, easeInOutCubic),
 
-        txt0.scale(0.09, 0.6, easeInOutCubic),
+        txt0.scale(0.095, 0.6, easeInOutCubic),
       )
     ),
   );
@@ -173,7 +172,7 @@ export default makeScene2D(function* (view) {
   const radiusTxt: Txt = new Txt({
     y: 50.0,
     x: () => radius() * circleScale * 0.5,
-    scale: 0.12,
+    scale: 0.14,
     fill: COLOR.BLACK,
   });
 
@@ -194,8 +193,6 @@ export default makeScene2D(function* (view) {
     animateDistanceLine(circleLine, 0.6, easeInOutQuint),
     radiusTxt.text(() => radius().toFixed(2).toString(), 0.6, easeInOutCubic),
   )
-
-  // yield* beginSlide("Scale circle up/down");
 
   yield* radius(9.0, 1.0, easeInOutCubic).to(4.5, 1.0, easeInOutCubic);
 
@@ -269,9 +266,9 @@ export default makeScene2D(function* (view) {
   );
 
   yield* all(
-    firstPixCoordTxt.position.y(firstPixCoordTxt.position.y() + 20.0, 0.5, easeInOutCubic),
+    firstPixCoordTxt.position.y(firstPixCoordTxt.position.y() + 30.0, 0.5, easeInOutCubic),
     firstPixCoordTxt.opacity(1.0, 0.4, easeInOutCubic),
-    firstPixCoordTxt.scale(0.1, 0.4, easeInOutCubic),
+    firstPixCoordTxt.scale(0.14, 0.4, easeInOutCubic),
   );
 
   const measureLineDist: number = 80.0;
@@ -286,7 +283,7 @@ export default makeScene2D(function* (view) {
   const pixelsHeightTxt: Txt = new Txt({
     position: new Vector2(-40.0, -renderCircle.size.y() * 0.5),
     rotation: -90.0,
-    scale: 0.1,
+    scale: 0.14,
     fill: COLOR.GREEN,
   });
 
@@ -299,7 +296,7 @@ export default makeScene2D(function* (view) {
   );
   const pixelsWidthTxt: Txt = new Txt({
     position: new Vector2(renderCircle.size.y() * 0.5, -40.0),
-    scale: 0.1,
+    scale: 0.14,
     fill: COLOR.RED,
   });
 
@@ -351,9 +348,8 @@ export default makeScene2D(function* (view) {
   const firstCenterDistCode: CodeBlock = new CodeBlock({
     position: new Vector2(-100.0, 150.0),
     offset: new Vector2(-1, 0),
-    scale: 0.1,
+    scale: 0.14,
     language: "hlsl",
-    fill: COLOR.YELLOW,
     shadowBlur: 10.0,
     shadowColor: COLOR.BLACK,
   });
@@ -385,7 +381,7 @@ export default makeScene2D(function* (view) {
   yield* firstCenterDistCode.edit(1.0, true)`${edit("sqrt(32)", "≈5.66")}`;
 
   const greaterThanRadiusTxt: Txt = new Txt({
-    position: new Vector2(20.0, 150.0),
+    position: firstCenterDistCode.position().add(new Vector2(160.0, -4.0)),
     scale: 0.14,
     fill: COLOR.RED,
     shadowBlur: 10.0,
@@ -464,7 +460,7 @@ export default makeScene2D(function* (view) {
   yield* animateDistanceLine(measureLine, 0.6, easeInOutCubic, 0.0, 1.0, 20.0, 0.0, 0.0);
   yield* scaleContentRect(verbalCont, 0.8, 0.0, easeInOutCubic);
 
-  const colorPixDuration: number = 0.15;
+  const colorPixDuration: number = 0.14;
   const drawCirclePixelTask: ThreadGenerator = yield chain(
     ...pixelGrid.map((pixels) =>
       chain(
@@ -524,7 +520,7 @@ export default makeScene2D(function* (view) {
     pixelsWidthTxtClone.opacity(1.0, 0.6, easeInOutCubic),
     all(
       pixelsWidthTxtClone.rotation(0.0, 0.6, easeInOutCubic),
-      pixelsWidthTxtClone.position(verbalCont.rect.position().add(new Vector2(-160.0, 200.0)), 0.6, easeInOutCubic),
+      pixelsWidthTxtClone.position(verbalCont.rect.position().add(new Vector2(-200.0, 200.0)), 0.6, easeInOutCubic),
     ),
   );
 
@@ -535,34 +531,35 @@ export default makeScene2D(function* (view) {
     pixelsHeightTxtClone.opacity(1.0, 0.6, easeInOutCubic),
     all(
       pixelsHeightTxtClone.rotation(0.0, 0.6, easeInOutCubic),
-      pixelsHeightTxtClone.position(verbalCont.rect.position().addY(200.0), 0.6, easeInOutCubic),
+      pixelsHeightTxtClone.position(verbalCont.rect.position().add(new Vector2(0.0, 200.0)), 0.6, easeInOutCubic),
     ),
   );
 
   const multiplyTxt: Txt = new Txt({
-    position: pixelsWidthTxtClone.position().addX(80.0),
-    scale: 0.1,
+    position: pixelsWidthTxtClone.position().addX(100.0),
+    scale: 0.14,
     fill: COLOR.WHITE,
-    text: "x",
+    text: "*",
     opacity: 0.0,
   });
   const equalTxt: Txt = new Txt({
-    position: pixelsHeightTxtClone.position().addX(80.0),
-    scale: 0.1,
+    position: pixelsHeightTxtClone.position().addX(100.0),
+    scale: 0.14,
     fill: COLOR.WHITE,
     text: "=",
     opacity: 0.0,
   });
   const resultTxt: Txt = new Txt({
-    position: pixelsHeightTxtClone.position().addX(170.0),
-    scale: 0.1,
+    position: pixelsHeightTxtClone.position().addX(120.0),
+    scale: 0.14,
+    offset: new Vector2(-1, 0),
     fill: COLOR.YELLOW,
     text: "81 pixels",
     opacity: 0.0,
   });
 
   const underlineRect: Rect = new Rect({
-    position: pixelsHeightTxtClone.position().add(new Vector2(114.0, 30.0)),
+    position: pixelsHeightTxtClone.position().add(new Vector2(190.0, 30.0)),
     size: new Vector2(0.0, 6.0),
     fill: COLOR.YELLOW,
   });
@@ -598,8 +595,8 @@ export default makeScene2D(function* (view) {
       equalTxt.position.x(equalTxt.position.x() - 90.0, 0.6),
     ),
     all(
-      resultTxt.scale(0.15, 0.6, easeInOutCubic),
-      underlineRect.size.x(200.0, 0.6, easeInOutCubic),
+      resultTxt.scale(0.2, 0.6, easeInOutCubic),
+      underlineRect.size.x(260.0, 0.6, easeInOutCubic),
     )
   );
 

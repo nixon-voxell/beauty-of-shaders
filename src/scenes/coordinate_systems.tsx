@@ -6,20 +6,22 @@ import {
 import { createTitleCont, changeTitleAtCenter, moveTitleToTopLeft } from "../utils/subtopic_util";
 
 import { makeScene2D } from "@motion-canvas/2d/lib/scenes";
-import { Circle, Grid, Line, Rect, Txt } from "@motion-canvas/2d/lib/components";
+import { Circle, Grid, Line, Ray, Rect, Txt } from "@motion-canvas/2d/lib/components";
 import { beginSlide } from "@motion-canvas/core/lib/utils";
 import { all, chain, sequence, waitFor } from "@motion-canvas/core/lib/flow";
 import { easeInOutCubic, easeInOutQuart, tween} from "@motion-canvas/core/lib/tweening";
-import { Vector2 } from "@motion-canvas/core/lib/types";
+import { PossibleVector2, Vector2 } from "@motion-canvas/core/lib/types";
+import { CodeBlock, edit, insert, remove } from "@motion-canvas/2d/lib/components/CodeBlock";
+import { createSignal, DEFAULT, SimpleSignal } from "@motion-canvas/core/lib/signals";
 
 export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);
 
-  const titleCont: ContentRect = createTitleCont("0. Why do we need parallelism?", view);
+  const titleCont: ContentRect = createTitleCont("2. Graphics pipeline", view);
 
   yield* beginSlide("Change title");
 
-  yield* changeTitleAtCenter(titleCont, "1. Coordinate systems");
+  yield* changeTitleAtCenter(titleCont, "3. Coordinate systems");
 
   yield* beginSlide("Move title to top left");
 
@@ -42,15 +44,15 @@ export default makeScene2D(function* (view) {
     opacity: 0.0,
   });
   const centerPointTxt: Txt = new Txt({
-    position: () => centerPoint.position().addY(40.0),
+    y: -40.0,
     scale: 0.1,
+    offset: new Vector2(-1, 0),
     fill: COLOR.WHITE,
-    text: "",
   });
 
   view.add(grid);
   grid.add(centerPoint);
-  grid.add(centerPointTxt);
+  centerPoint.add(centerPointTxt);
 
   yield* beginSlide("World origin");
 
@@ -137,12 +139,11 @@ export default makeScene2D(function* (view) {
     shadowBlur: 10.0,
     opacity: 0.0,
   });
-  const squareCenterArrow: Line = new Line({
+  const worldSpaceArrowTo: SimpleSignal<PossibleVector2<number>> = createSignal(() => square.rect.position());
+  const worldSpaceArrow: Ray = new Ray({
+    from: () => centerPoint.position(),
+    to: worldSpaceArrowTo,
     lineWidth: 10.0,
-    points: [
-      () => centerPoint.position(),
-      () => square.rect.position(),
-    ],
     stroke: COLOR.BLUE,
     arrowSize: 0.0,
     endArrow: true,
@@ -151,7 +152,7 @@ export default makeScene2D(function* (view) {
   });
 
   square.rect.add(squareCenterPoint);
-  grid.add(squareCenterArrow);
+  grid.add(worldSpaceArrow);
 
   yield* beginSlide("Show square center point");
 
@@ -162,13 +163,13 @@ export default makeScene2D(function* (view) {
 
   yield* sequence(
     0.1,
-    squareCenterArrow.end(1.0, 0.6, easeInOutCubic),
-    squareCenterArrow.arrowSize(20.0, 0.6, easeInOutCubic),
-  )
+    worldSpaceArrow.end(1.0, 0.6, easeInOutCubic),
+    worldSpaceArrow.arrowSize(20.0, 0.6, easeInOutCubic),
+  );
 
   const squarePoints: Circle[] = new Array<Circle>(4);
   const squarePointTxts: Txt[] = new Array<Txt>(4);
-  const squarePointArrows: Line[] = new Array<Line>(4);
+  const squarePointArrows: Ray[] = new Array<Ray>(4);
 
   var pointIdx: number = 0;
 
@@ -194,12 +195,10 @@ export default makeScene2D(function* (view) {
         text: () => `[${squarePoint.position.x()}, ${-squarePoint.position.y()}]`,
       });
 
-      const squarePointArrow: Line = new Line({
-        lineWidth: 8.0,
-        points: [
-          0.0,
-          () => squarePoint.position(),
-        ],
+      const squarePointArrow: Ray = new Ray({
+        from: 0.0,
+        to: () => squarePoint.position(),
+        lineWidth: 10.0,
         stroke: COLOR.RED,
         endArrow: true,
         arrowSize: 0.0,
@@ -221,8 +220,8 @@ export default makeScene2D(function* (view) {
 
   yield* sequence(
     0.1,
-    squareCenterArrow.arrowSize(0.0, 0.6, easeInOutCubic),
-    squareCenterArrow.end(0.0, 0.6, easeInOutCubic),
+    worldSpaceArrow.arrowSize(0.0, 0.6, easeInOutCubic),
+    worldSpaceArrow.end(0.0, 0.6, easeInOutCubic),
     ...squarePoints.map(point =>
       all(
         point.opacity(1.0, 0.4, easeInOutCubic),
@@ -258,13 +257,15 @@ export default makeScene2D(function* (view) {
   yield* moveContentRect(square, new Vector2(100.0, -300.0), 0.6, easeInOutCubic);
 
   const localSpaceToSquareTxt: Txt = new Txt({
-    position: squarePoints[2].position().add(new Vector2(220.0, 60.0)),
+    position: squarePoints[2].position().add(new Vector2(50.0, 60.0)),
+    offset: new Vector2(-1, 0),
     scale: 0.12,
     fill: COLOR.RED,
   });
 
   const localSpaceToWorldTxt: Txt = new Txt({
-    y: -200.0,
+    position: new Vector2(-80.0, -200.0),
+    offset: new Vector2(-1, 0),
     scale: 0.12,
     fill: COLOR.BLUE,
   });
@@ -274,7 +275,15 @@ export default makeScene2D(function* (view) {
 
   yield* beginSlide("Local space to square txt");
 
-  yield* localSpaceToSquareTxt.text("(local space wrt square)", 0.6);
+  yield* all(
+    localSpaceToSquareTxt.text("(local space wrt square)", 0.6),
+
+    // fade out other square point local coordinates
+    ...squarePointTxts.slice(0, 2).map(txt => txt.opacity(0.0, 0.6, easeInOutCubic)),
+    ...squarePointTxts.slice(0, 2).map(txt => txt.scale(0.05, 0.6, easeInOutCubic)),
+    ...squarePointTxts.slice(3).map(txt => txt.opacity(0.0, 0.6, easeInOutCubic)),
+    ...squarePointTxts.slice(3).map(txt => txt.scale(0.05, 0.6, easeInOutCubic)),
+  );
 
   yield* beginSlide("Local space to world txt");
 
@@ -284,11 +293,26 @@ export default makeScene2D(function* (view) {
 
   yield* localSpaceToWorldTxt.text("(local space wrt world = world space)", 0.6);
 
-  const squarePointWorldSpaceTxt: Txt = squarePointTxts[2].clone();
-  squarePointWorldSpaceTxt.position(squarePointTxts[2].position());
-  squarePointWorldSpaceTxt.opacity(0.0);
+  function getSquarePointLocalPos(idx: number): Vector2 {
+    return new Vector2(squarePoints[idx].position.x(), -squarePoints[idx].position.y());
+  }
 
-  squarePoints[2].add(squarePointWorldSpaceTxt);
+  function getSquarePointWorldPos(idx: number): Vector2 {
+    return squarePoints[idx].absolutePosition().sub(centerPoint.absolutePosition()).scale(1.0 / view.scale().x);
+  }
+
+  const squarePointCoord: CodeBlock = new CodeBlock({
+    x: squarePointTxts[2].position.x() - 70.0,
+    y: squarePointTxts[2].position.y(),
+    scale: squarePointTxts[2].scale(),
+    offset: new Vector2(-1, 0),
+    language: "hlsl",
+    code: `[100, 100]`,
+    opacity: 0.0,
+  });
+  squarePointCoord.opacity(0.0);
+
+  squarePoints[2].add(squarePointCoord);
 
   yield* beginSlide("Copy local space coordinate")
 
@@ -301,39 +325,42 @@ export default makeScene2D(function* (view) {
   );
 
   yield* all(
-    squarePointWorldSpaceTxt.position(squarePointWorldSpaceTxt.position().addY(-80.0), 0.6, easeInOutCubic),
-    squarePointWorldSpaceTxt.opacity(1.0, 0.6, easeInOutCubic),
+    squarePointCoord.position(squarePointCoord.position().addY(-80.0), 0.6, easeInOutCubic),
+    squarePointCoord.opacity(1.0, 0.6, easeInOutCubic),
   )
 
-  yield* squarePointWorldSpaceTxt.text("mul(localToWorldMatrix, localPosition)", 0.6);
+  yield* beginSlide("Show local to world equation");
 
-  yield* beginSlide("Fill in local position");
+  yield* squarePointCoord.edit(1.0, true)`${insert("mul(localToWorldMatrix, ")}[${
+    `${getSquarePointLocalPos(2).x}, ${getSquarePointLocalPos(2).y}`
+  }]${insert(")")}`;
 
-  yield* squarePointWorldSpaceTxt.text("mul(localToWorldMatrix, [100, 100])", 0.6);
+  yield* beginSlide("Vectors to world square point");
+
+  yield* chain(
+      sequence(
+      0.1,
+      worldSpaceArrow.end(1.0, 0.6, easeInOutCubic),
+      worldSpaceArrow.arrowSize(20.0, 0.6, easeInOutCubic),
+    ),
+    sequence(
+      0.1,
+      squarePointArrows[2].end(1.0, 0.4, easeInOutCubic),
+      squarePointArrows[2].arrowSize(20.0, 0.4, easeInOutCubic),
+    ),
+  );
 
   yield* beginSlide("Show square point world position");
 
   yield* all(
-    squarePointWorldSpaceTxt.text(() => {
-      const worldPos: Vector2 = squarePoints[2].absolutePosition().sub(centerPoint.absolutePosition());
-      return `[${worldPos.x.toFixed()}, ${-worldPos.y.toFixed()}]`;
-    }, 0.6),
-    squarePointWorldSpaceTxt.fill(COLOR.BLUE, 0.6),
+    squarePointCoord.edit(1.0, false)`${remove("mul(localToWorldMatrix, ")}[${edit(
+      `${getSquarePointLocalPos(2).x}, ${getSquarePointLocalPos(2).y}`,
+      `${getSquarePointWorldPos(2).x.toFixed()}, ${-getSquarePointWorldPos(2).y.toFixed()}`
+    )}]${remove(")")}`,
+    squarePointCoord.fill(COLOR.BLUE, 0.6),
   );
 
-  yield* beginSlide("Vectors to square point");
-
-  yield* sequence(
-    0.1,
-    squareCenterArrow.end(1.0, 0.6, easeInOutCubic),
-    squareCenterArrow.arrowSize(20.0, 0.6, easeInOutCubic),
-  );
-
-  yield* sequence(
-    0.1,
-    squarePointArrows[2].end(1.0, 0.4, easeInOutCubic),
-    squarePointArrows[2].arrowSize(20.0, 0.4, easeInOutCubic),
-  );
+  squarePointCoord.code(() => `[${getSquarePointWorldPos(2).x.toFixed()}, ${-getSquarePointWorldPos(2).y.toFixed()}]`);
 
   const originSquareRect: Rect = square.rect.clone();
   originSquareRect.position(square.rect.position());
@@ -382,7 +409,7 @@ export default makeScene2D(function* (view) {
 
   yield* beginSlide("Move world around #2");
 
-  squarePointWorldSpaceTxt.text(squarePointWorldSpaceTxt.text());
+  squarePointCoord.code(squarePointCoord.code());
 
   yield* chain(
     sequence(
@@ -398,10 +425,183 @@ export default makeScene2D(function* (view) {
     ),
   );
 
-  yield* beginSlide("Fade out grid");
+  squarePointCoord.code(() => `[${getSquarePointWorldPos(2).x.toFixed()}, ${-getSquarePointWorldPos(2).y.toFixed()}]`);
+
+  const screenBorder: Line = new Line({
+    lineWidth: 10.0,
+    points: [
+      new Vector2(-900.0, -500.0),
+      new Vector2(900.0, -500.0),
+      new Vector2(900.0, 500.0),
+      new Vector2(-900.0, 500.0),
+      new Vector2(-900.0, -505.0),
+    ],
+    stroke: COLOR.LIGHT_BLUE,
+    zIndex: -1,
+    end: 0.0,
+  });
+  const screenOriginPoint: Circle = new Circle({
+    position: screenBorder.points()[3],
+    scale: 0.0,
+    size: 40.0,
+    fill: COLOR.GREEN,
+    shadowColor: COLOR.BLACK,
+    shadowBlur: 10.0,
+    opacity: 0.0,
+  });
+  const screenOriginTxt: Txt = new Txt({
+    y: -40.0,
+    scale: 0.1,
+    offset: new Vector2(-1, 0),
+    fill: COLOR.WHITE,
+  });
+
+  grid.add(screenBorder);
+  grid.add(screenOriginPoint);
+  screenOriginPoint.add(screenOriginTxt);
+
+  yield* beginSlide("Move world arrow to square point");
 
   yield* all(
-    grid.scale(0.8, 0.6, easeInOutCubic),
-    grid.opacity(0.0, 0.6, easeInOutCubic),
+    square.rect.scale(1.0, 0.6, easeInOutCubic),
+    square.rect.rotation(0.0, 0.6, easeInOutCubic),
+    square.rect.opacity(1.0, 0.6, easeInOutCubic),
+    originSquareRect.opacity(0.0, 0.6, easeInOutCubic),
+    sequence(
+      0.1,
+      squarePointArrows[2].arrowSize(0.0, 0.6, easeInOutCubic),
+      squarePointArrows[2].end(0.0, 0.6, easeInOutCubic),
+    ),
+  );
+
+  yield* worldSpaceArrowTo(getSquarePointWorldPos(2), 0.6, easeInOutCubic),
+
+  yield* beginSlide("Show screen border");
+
+  yield* chain(
+    screenBorder.end(1.0, 2.0, easeInOutCubic),
+  );
+
+  yield* beginSlide("Show screen origin");
+
+  yield* sequence(
+    0.3,
+    all(
+      screenOriginPoint.scale(1.0, 0.6, easeInOutCubic),
+      screenOriginPoint.opacity(1.0, 0.6, easeInOutCubic),
+    ),
+    screenOriginTxt.text("screen origin", 0.6),
+  );
+
+  yield* beginSlide("Show calculate screen space equation");
+
+  yield* squarePointCoord.edit(1.0, true)
+  `${insert("mul(worldToScreenMatrix, ")}[${`${getSquarePointWorldPos(2).x.toFixed()}, ${-getSquarePointWorldPos(2).y.toFixed()}`}]${insert(")")}`;
+
+  const screenSpaceArrowTo: SimpleSignal<PossibleVector2<number>> = createSignal(() => centerPoint.position());
+  const screenSpaceArrow: Ray = new Ray({
+    from: () => screenOriginPoint.position(),
+    to: screenSpaceArrowTo,
+    lineWidth: 8.0,
+    stroke: COLOR.GREEN,
+    endArrow: true,
+    arrowSize: 0.0,
+    end: 0.0,
+  });
+
+  grid.add(screenSpaceArrow);
+
+  yield* beginSlide("Vectors to screen square point");
+
+  yield* sequence(
+    0.1,
+    screenSpaceArrow.end(1.0, 0.6, easeInOutCubic),
+    screenSpaceArrow.arrowSize(20.0, 0.6, easeInOutCubic),
+  );
+
+  yield* beginSlide("Show square point screen position");
+
+  function getSquarePointScreenPos(idx: number): Vector2 {
+    return squarePoints[idx].absolutePosition().sub(screenOriginPoint.absolutePosition()).scale(1.0 / view.scale().x);
+  }
+
+  yield* all(
+    squarePointCoord.edit(1.0, false)
+    `${remove("mul(worldToScreenMatrix, ")}[${edit(
+      `${getSquarePointWorldPos(2).x.toFixed()}, ${-getSquarePointWorldPos(2).y.toFixed()}`,
+      `${getSquarePointScreenPos(2).x.toFixed()}, ${-getSquarePointScreenPos(2).y.toFixed()}`
+    )}]${remove(")")}`,
+
+    // move screen arrow to square point and remove world arrow
+    screenSpaceArrowTo(getSquarePointWorldPos(2), 0.6, easeInOutCubic),
+    sequence(
+      0.1,
+      worldSpaceArrow.arrowSize(0.0, 0.6, easeInOutCubic),
+      worldSpaceArrow.end(0.0, 0.6, easeInOutCubic),
+    ),
+  );
+
+  yield* beginSlide("Back to square point local position");
+
+  yield* sequence(
+    0.1,
+    sequence(
+      0.1,
+      screenSpaceArrow.arrowSize(0.0, 0.6, easeInOutCubic),
+      screenSpaceArrow.end(0.0, 0.6, easeInOutCubic),
+    ),
+    squarePointCoord.edit(1.0, true)`[${edit(
+      `${getSquarePointScreenPos(2).x.toFixed()}, ${-getSquarePointScreenPos(2).y.toFixed()}`,
+      `${getSquarePointLocalPos(2).x}, ${getSquarePointLocalPos(2).y}`
+    )}]`,
+    sequence(
+      0.1,
+      squarePointArrows[2].end(1.0, 0.6, easeInOutCubic),
+      squarePointArrows[2].arrowSize(20.0, 0.6, easeInOutCubic),
+    ),
+  );
+
+  worldSpaceArrowTo(square.rect.position());
+
+  yield* beginSlide("Multiply local to world matrix");
+
+  yield* sequence(
+    0.1,
+    squarePointCoord.edit(1.0, true)`${insert("mul(localToWorldMatrix, ")}[${
+      `${getSquarePointLocalPos(2).x}, ${getSquarePointLocalPos(2).y}`
+    }]${insert(")")}`,
+    worldSpaceArrow.end(1.0, 0.6, easeInOutCubic),
+    worldSpaceArrow.arrowSize(20.0, 0.6, easeInOutCubic),
+  );
+
+  screenSpaceArrowTo(centerPoint.position());
+
+  yield* beginSlide("Multiply world to screen matrix");
+
+  yield* sequence(
+    0.1,
+    squarePointCoord.edit(1.0, true)`${insert("mul(worldToScreenMatrix, ")}mul(localToWorldMatrix, [${
+      `${getSquarePointLocalPos(2).x}, ${getSquarePointLocalPos(2).y}`
+    }])${insert(")")}`,
+    screenSpaceArrow.end(1.0, 0.6, easeInOutCubic),
+    screenSpaceArrow.arrowSize(20.0, 0.6, easeInOutCubic),
+  );
+
+  yield* beginSlide("Reveal entire equation");
+
+  yield* squarePointCoord.selection(DEFAULT, 0.6, easeInOutCubic);
+
+  yield* beginSlide("Fade out grid");
+
+  yield* sequence(
+    0.1,
+    all(
+      grid.scale(0.8, 0.6, easeInOutCubic),
+      grid.opacity(0.0, 0.6, easeInOutCubic),
+    ),
+    all(
+      titleCont.rect.scale(0.8, 0.6, easeInOutCubic),
+      titleCont.rect.opacity(0.0, 0.6, easeInOutCubic),
+    ),
   );
 });

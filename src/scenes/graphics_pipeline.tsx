@@ -16,11 +16,11 @@ export default makeScene2D(function* (view) {
   view.fontFamily(`"Consolas", monospace`).fontWeight(700).fontSize(256);
   const random = useRandom(7919);
 
-  const titleCont: ContentRect = createTitleCont("2. Basic mesh concepts", view);
+  const titleCont: ContentRect = createTitleCont("1. Basic mesh concepts", view);
 
   yield* beginSlide("Change title");
 
-  yield* changeTitleAtCenter(titleCont, "3. Graphics pipeline");
+  yield* changeTitleAtCenter(titleCont, "2. Graphics pipeline");
 
   yield* beginSlide("Move title to top left");
 
@@ -120,7 +120,7 @@ export default makeScene2D(function* (view) {
   );
 
   const rasterizerTitle: Txt = new Txt({
-    y: -300.0,
+    y: -340.0,
     scale: 0.1,
     fill: COLOR.WHITE,
     text: "Rasterizer",
@@ -132,13 +132,13 @@ export default makeScene2D(function* (view) {
   yield* beginSlide("Show rasterizer title");
 
   yield* all(
-    rasterizerTitle.scale(0.2, 0.6, easeInOutCubic),
+    rasterizerTitle.scale(0.3, 0.6, easeInOutCubic),
     rasterizerTitle.opacity(1.0, 0.6, easeInOutCubic),
   );
 
   const canIMoveThisTxt: Txt = new Txt({
     y: -40.0,
-    scale: 0.1,
+    scale: 0.15,
     fill: COLOR.BLUE,
     text: "can I move this?",
   });
@@ -391,8 +391,6 @@ export default makeScene2D(function* (view) {
     all(
       rasterizerTitle.scale(0.1, 0.6, easeInOutCubic),
       rasterizerTitle.opacity(0.0, 0.6, easeInOutCubic),
-      titleCont.rect.scale(0.1, 0.6, easeInOutCubic),
-      titleCont.rect.opacity(0.0, 0.6, easeInOutCubic),
     ),
   )
 });
