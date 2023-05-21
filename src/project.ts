@@ -9,6 +9,7 @@ import basic_mesh_concepts from "./scenes/basic_mesh_concepts?scene"
 import graphics_pipeline from "./scenes/graphics_pipeline?scene"
 import coordinate_systems from "./scenes/coordinate_systems?scene"
 import writing_first_shader from "./scenes/writing_first_shader?scene"
+import debugging from "./scenes/debugging?scene";
 
 export default makeProject({
   scenes: [
@@ -21,5 +22,6 @@ export default makeProject({
     graphics_pipeline,
     coordinate_systems,
     writing_first_shader,
+    debugging,
   ],
 });
