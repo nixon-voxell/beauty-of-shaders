@@ -2,7 +2,7 @@ import {makeProject} from "@motion-canvas/core";
 
 import intro from "./scenes/intro?scene";
 import outline from "./scenes/outline?scene"
-import types_of_shaders from "./scenes/types_of_shaders?scene"
+// import types_of_shaders from "./scenes/types_of_shaders?scene"
 import what_is_a_shader from "./scenes/what_is_a_shader?scene";
 import why_parallelism from "./scenes/why_parallelism?scene"
 import basic_mesh_concepts from "./scenes/basic_mesh_concepts?scene"

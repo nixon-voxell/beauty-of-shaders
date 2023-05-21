@@ -25,7 +25,7 @@ void main() {
     float scaledSinTime = (sinTime + 1.0) * 0.5;
     float mixTime = mix(0.2, 0.3, scaledSinTime);
 
-    float l = mixTime / uniformCoordLength;
+    float div = mixTime / uniformCoordLength;
 
     vec4 resultCol = vec4(0.0);
 
@@ -36,10 +36,8 @@ void main() {
     resultCol = mix(resultCol, vec4(ivec2(shiftedCoord), 0.0, 1.0), shiftedCoordOpacity);
     resultCol = mix(resultCol, vec4(uniformCoord, 0.0, 1.0), uniformCoordOpacity);
     resultCol = mix(resultCol, vec4(vec3(uniformCoordLength), 1.0), uniformCoordLenOpacity);
-    resultCol = mix(resultCol, vec4(vec3(l), 1.0), resultOpacity);
+    resultCol = mix(resultCol, vec4(vec3(div), 1.0), resultOpacity);
 
     resultCol.a = opacity;
     gl_FragColor = resultCol;
-    // gl_FragColor = vec4(ivec2(shiftedCoord), 0.0, 1.0);
-    // gl_FragColor = vec4(vec3(l), 1.0);
 }
